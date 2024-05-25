@@ -1,0 +1,7 @@
+h1 {
+    color: var(--bpi-red);
+}
+
+body {
+    background-color: var(--background-main);
+}

@@ -1,0 +1,17 @@
+:root {
+    --bpi-red: #e54d4e;
+    --background-main: #f9fafb;
+    --background-sidebar: #ffffff;
+    
+
+    /* For buttons */
+    --button-primary: #e54d4e;
+    --button-disabled: #f2c4c6;
+
+    /* For text box */
+    --inputbox: #f4f5f6;
+
+    /* For text */
+    --forgotcreds: #9fd7d5;
+
+}
