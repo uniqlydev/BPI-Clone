@@ -8,3 +8,7 @@ from django.template import loader
 def index(request):
     template = loader.get_template('home/index.html')
     return HttpResponse(template.render())
+
+def register(request):
+    template = loader.get_template('home/register.html')
+    return HttpResponse(template.render())

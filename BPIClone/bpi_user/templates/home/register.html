@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BPI - Bank of the Philippine Islands</title>
+    <link rel="stylesheet" href="{% static 'bpi/colors.css' %}">
+    <link rel="stylesheet" href="{% static 'bpi/fonts.css' %}">
+    <link rel="stylesheet" href="{% static 'bpi/register.css' %}">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li>
+                <a href="#">Login</a>
+            </li>
+            <li>
+                <a href="/">Contact Us</a>
+            </li>
+        </ul>
+    </nav>
+    <aside>
+        <div class="logo-container">
+            <h1>BPI</h1>
+        </div>
+        <div class="register-form">
+            <h1>Bank with BPI </h1>
+            <h2>Join Us Today!</h2>
+            <form action="">
+                <div class="name-container">
+                    <input type="text" name="first-name" placeholder="First Name" id="first-name">
+                    <input type="text" name="last-name" placeholder="Last Name" id="last-name">
+                </div>
+                <input type="text" name="username" placeholder="Username" id="username">
+                <input type="password" name="password" placeholder="Password" id="password">
+                <input type="password" name="confirm-password" placeholder="Confirm Password" id="confirm-password">
+                <input type ="text" name="mobile-number" placeholder="Mobile Number (+639) or (09)" id="mobile-number">
+                <input type="submit" value="Register">
+            </form>
+        </div>
+        <div class="divider">
+            <div class="divide"></div>
+            <h1>OR</h1>
+            <div class="divide"></div>
+        </div>
+        <div class="register-container">
+            <button class="register">Log In</button>
+        </div>
+
+        <div class="inquiries">
+            <h1>Show inquiries and other services</h1>
+        </div>
+        <footer>
+            <p>Deposits are insured by PDIC up to P500,000 per depositor.<br><br>
+               For inquiries and comments please <span class="credentials">send us a message</span> or
+               call our 24-hour BPI Contact Center at (+632) 889-10000.<br><br>
+               BPI is a proud member of BancNet. BPI is regulated by the 
+               Bangko Sentral ng Pilipinas. <span class="credentials">https://www.bsp.gov.ph</span><br><br>
+               Copyright © 2023 BPI. All Rights Reserved
+            </p>
+        </footer>
+    </aside>
+    <main>
+        <div class="background-image"></div>
+        <div class="footer">
+            <div class="information">
+                <ul>
+                    <li>
+                        <a href="#">Service Agreement</a>
+                    </li>
+                    <li>
+                        <a href="#">Learn About Security</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
