@@ -142,6 +142,11 @@ aside .register-container .register {
     cursor: pointer;
     font-size: 15px;
     border-radius: 5px;
+
+    /* Center text */
+    text-align: center;
+    /* REmove underline */
+    text-decoration: none;
 }
 
 aside .register-container .register:hover {
