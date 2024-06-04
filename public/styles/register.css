@@ -1,0 +1,268 @@
+body {
+    display: flex; /* Enable flexbox on the body */
+    flex-direction: row; /* Arrange children in a row */
+    margin: 0;
+    height: 100vh; /* Make the body take the full height of the viewport */
+    font-family: var(--font-body);
+}
+
+aside {
+    padding: 15px;
+    background-color: var(--background-sidebar);
+    width: 50%; /* Make the aside take half of the viewport width */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+aside .logo-container {
+    width: 100%;
+    height: auto; /* Ensure it wraps content */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+aside .logo-container h1 {
+    color: var(--bpi-red);
+    font-family: var(--logo-font);
+    font-size: 2.5rem;
+    font-weight: bold;
+    font-optical-sizing: auto;
+    font-style: normal;
+    padding-left: 15px;
+    margin: 0; /* Reset margin to avoid unwanted spacing */
+}
+
+aside .register-form h1 {
+    font-family: var(--font-body);
+    font-size: 30px;
+    font-weight: 700;
+    font-optical-sizing: auto;
+    font-style: normal;
+    padding-left: 15px;
+}
+
+aside .register-form h2 {
+    font-family: var(--font-body);
+    font-size: 20px;
+    font-weight: 400;
+    font-optical-sizing: auto;
+    font-style: light;
+    padding-left: 15px;
+    color: darkslategray;
+    margin-top: -20px;
+    margin-bottom: 30px;
+}
+
+aside form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+}
+
+aside .name-container{
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    max-width: fit-content;
+
+}
+
+aside form input[type="text"], aside form input[type="password"] {
+    padding: 18px;
+    background-color: var(--inputbox);
+    border-radius: 5px;
+    border: none;
+}
+
+/* Add border bottom when pressed */
+aside form input[type="text"]:focus, aside form input[type="password"]:focus {
+    border-bottom: 2px solid black;
+    font-family: var(--font-body);
+    font-weight: 400;
+
+    /* Remove outline when pressed */
+    outline: none;
+}
+
+aside form input[type="submit"] {
+    padding: 15px;
+    background-color: var(--button-primary);
+    color: white;
+    font-family: var(--font-body);
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 18px;
+}
+
+aside .forgot-container {
+    /* Center in aside */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.credentials {
+    color: var(--forgotcreds);
+    font-family: var(--font-body);
+    cursor: pointer;
+    font-weight: 400;
+    /* Underline */
+    text-decoration: underline;
+}
+
+aside .divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 20px 0; /* Adjust the margin as needed */
+}
+
+aside .divider .divide {
+    flex-grow: 1;
+    height: 1px;
+    background-color: gray;
+    opacity: 0.3;
+}
+
+aside .divider h1 {
+    padding: 0 10px;
+    color: gray;
+    font-family: var(--font-body);
+    font-size: 15px;
+    opacity: 0.3;
+}
+
+aside .register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+aside .register-container .register {
+    width: 90%;
+    padding: 15px;
+    background-color: transparent;
+    border: 1px solid var(--register-button);
+    color: var(--register-button);
+    font-family: var(--font-body);
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 15px;
+    border-radius: 5px;
+}
+
+aside .register-container .register:hover {
+    color: black;
+    font-size: 15.5px;
+}
+
+aside .inquiries {
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+    padding: 10px;
+
+    /* Make bottom */
+    margin-top: auto;
+
+}
+
+aside .inquiries h1 {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+aside footer {
+    padding: 10px;
+    /* add a bit of space dynamic bottom */
+    margin-bottom: 20px;
+}
+
+aside footer p {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--register-button);
+}
+
+main {
+    width: 50%; /* Make the main take half of the viewport width */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    background-color: var(--background-main);
+    position: relative; /* Position relative to position the footer absolutely within it */
+}
+
+main .background-image {
+    width: 700px;
+    height: 700px;
+    background-image: url('../assets/BPI_home.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+main .footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%; /* Ensure the footer spans the full width */
+    background-color: var(--background-main); /* Adjust as needed */
+    padding: 10px; /* Adjust padding as needed */
+    display: flex; /* Enable flexbox */
+    justify-content: flex-start; /* Align content to the left */
+    align-items: center;
+}
+
+main .footer .information ul {
+    display: flex;
+    gap: 15px;
+}
+
+main .footer .information ul li {
+    list-style-type: none;
+}
+
+main .footer .information ul li a {
+    color: black;
+    font-family: var(--font-body);
+    font-weight: 400;
+    text-decoration: none;
+
+    /* Add underline */
+    text-decoration: underline;
+
+    cursor: pointer;
+}
+
+/* Navbar make it top right */
+nav {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 30px;
+    z-index: 1000; /* Set a high z-index to ensure it appears on top */
+}
+
+nav ul {
+    display: flex;
+    gap: 15px;
+}
+
+nav ul li {
+    list-style-type: none;
+}
+
+nav ul li a {
+    color: black;
+    font-family: var(--font-body);
+    font-weight: 700;
+    text-decoration: none;
+}
