@@ -19,7 +19,6 @@ const server_credentials = {
 
 const app = express()
 app.use(bodyParser.json())
-const port = process.env.PORT || 3000
 
 
 app.use(cors());
