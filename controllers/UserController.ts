@@ -3,7 +3,7 @@ const pool = require('../model/database');
 const IDGenerator = require('../utils/IDGenerator');
 const Hash = require('../utils/HashUtility')
 
-exports.register = (req: { body: { password: any; first_name?: any; last_name?: any; email?: any; phone_number?: any; }; }, res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
+exports.register = (req: { body: { password: String; first_name?: String; last_name?: String; email?: String; phone_number?: String; }; }, res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
 
     const hasher = new Hash();
     const idGen = new IDGenerator();
@@ -11,7 +11,7 @@ exports.register = (req: { body: { password: any; first_name?: any; last_name?: 
 
     const hashed_password = hasher.hashPassword(password);
 
-    req.body.password = null; // Setting to null
+    req.body.password = 'null'; // Setting to null
 
     console.log(hashed_password);
 
@@ -19,7 +19,7 @@ exports.register = (req: { body: { password: any; first_name?: any; last_name?: 
     const id = idGen.generateID();
 
     const query = "INSERT INTO Users(id, first_name, last_name, email, password, phone_number) VALUES($1, $2, $3, $4, $5, $6) RETURNING *";
-    const user = new User(id, first_name, last_name, email, hashed_password, phone_number);
+    const user = new User(id, first_name!, last_name!, email!, hashed_password!, phone_number!);
 
     pool.query(query, [user.getID(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword(), user.getPhone()], (err: string, result: { rows: string | any[]; }) => {
         if (err) {
