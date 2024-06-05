@@ -27,14 +27,32 @@
             <h2>Join Us Today!</h2>
             <form method="POST" id="registerForm">
                 <div class="name-container">
-                    <input type="text" name="first-name" placeholder="First Name" id="first-name">
-                    <input type="text" name="last-name" placeholder="Last Name" id="last-name">
+                    <div class="inputControl">
+                        <input type="text" name="first-name" placeholder="First Name" id="first-name">
+                        <div class="error"></div>
+                    </div>
+                    <div class="inputControl">
+                        <input type="text" name="last-name" placeholder="Last Name" id="last-name">
+                        <div class="error"></div>
+                    </div>
                 </div>
-                <input type="password" name="password" placeholder="Password" id="password">
-                <input type="password" name="confirm-password" placeholder="Confirm Password" id="confirm-password">
-                <input type ="text" name="mobile-number" placeholder="Mobile Number (+639) or (09)" id="mobile-number">
-                <input type ="text" name="email" placeholder="Email" id="email">
-                <button id="submit" type="button"> Register </button>
+                    <div class="inputControl">
+                        <input type="password" name="password" placeholder="Password" id="password">
+                        <div class="error"></div>
+                    </div>
+                    <div class="inputControl">
+                        <input type="password" name="confirm-password" placeholder="Confirm Password" id="confirm-password">
+                        <div class="error"></div>
+                    </div>
+                    <div class="inputControl">
+                        <input type ="text" name="mobile-number" placeholder="Mobile Number (+639) or (09)" id="mobile-number">
+                        <div class="error"></div>
+                    </div>
+                    <div class="inputControl">
+                        <input type ="text" name="email" placeholder="Email" id="email">
+                        <div class="error"></div>
+                    </div>
+                <input id="submit" type="submit"> Register </button>
             </form>
         </div>
         <div class="divider">
