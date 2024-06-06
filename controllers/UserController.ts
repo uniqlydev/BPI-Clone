@@ -1,3 +1,4 @@
+import { register } from 'module';
 import User from '../model/User';
 const pool = require('../model/database');
 const IDGenerator = require('../utils/IDGenerator');
@@ -31,6 +32,24 @@ exports.register = (req: { body: { password: String; first_name?: String; last_n
         } else {
             console.error('No rows returned'); // Log the issue for debugging
             return res.status(400).send('User could not be added.');
+        }
+    });
+};
+
+exports.getUser = (req:any,res: any) => {
+    // Retrieve all users
+    const query = "SELECT email FROM Users;"
+
+    pool.query(query, (err: string, result: { rows: any; }) => {
+        if (err) {
+            console.error('Error executing query', err); // Log the error for debugging
+            return res.status(400).send(err); // Send the error in the response
+        }
+        if (result && result.rows && result.rows.length > 0) {
+            return res.status(200).send(result.rows);
+        } else {
+            console.error('No rows returned'); // Log the issue for debugging
+            return res.status(400).send('No users found.');
         }
     });
 };

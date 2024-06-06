@@ -17,6 +17,8 @@ class HashUtility {
             throw new Error('Failed to hash password');
         }
     }
+
+    
 }
 
 module.exports = HashUtility;

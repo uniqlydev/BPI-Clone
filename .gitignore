@@ -24,6 +24,9 @@ dist/
 
 # Other build and package management files
 package-lock.json
-server.cert
+
+
+# SSL Certificates
 server.key
+server.cert
 

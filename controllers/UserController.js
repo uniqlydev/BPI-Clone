@@ -31,3 +31,20 @@ exports.register = (req, res) => {
         }
     });
 };
+exports.getUser = (req, res) => {
+    // Retrieve all users
+    const query = "SELECT email FROM Users;";
+    pool.query(query, (err, result) => {
+        if (err) {
+            console.error('Error executing query', err); // Log the error for debugging
+            return res.status(400).send(err); // Send the error in the response
+        }
+        if (result && result.rows && result.rows.length > 0) {
+            return res.status(200).send(result.rows);
+        }
+        else {
+            console.error('No rows returned'); // Log the issue for debugging
+            return res.status(400).send('No users found.');
+        }
+    });
+};
