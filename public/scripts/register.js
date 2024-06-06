@@ -1,5 +1,3 @@
-const { register } = require("module");
-
 const setError = (element, message) => {
     const inputControl = element.parentElement;
     const errorDisplay = inputControl.querySelector('.error');
@@ -84,10 +82,10 @@ const validateInputs = () => {
         setError(mobile, 'Mobile number cannot be blank');
         isValid = false;
     } else if(!isValidMobileNumber(valid_mobile_number)){
-        setError(mobile_number, "Provide a valid mobile number");
+        setError(mobile, "Provide a valid mobile number");
         isValid = false;
     } else {
-        setSuccess(mobile_number);
+        setSuccess(mobile);
     }
 
     // Email Validation
@@ -129,21 +127,41 @@ const isValidEmail = email => {
 document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
     const submitbtn = document.getElementById('submit');
+    const first_name = document.getElementById('first_name');
 
-    
-    // Create fetch request /api/users/register
-    fetch('/api/users/register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            firstname: registerForm.first_name.value,
-            lastname: registerForm.last_name.value,
-            password: registerForm.password.value,
-            mobile: registerForm.mobile.value,
-            email: registerForm.email.value
+    console.log(first_name.value)
 
-        }) 
-    }).then(response => response.json())
+    submitbtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        if (validateInputs() == true) {
+            fetch('/api/users/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    first_name: first_name.value,
+                    last_name: last_name.value,
+                    password: password.value,
+                    email:email.value,
+                    phone_number: mobile.value
+                })
+            }).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Something went wrong');
+                }
+            }).then(data => {
+                console.log(data);
+                window.location.href = '/';
+            }).catch(error => {
+                console.log(error);
+            });
+        }else {
+            alert('Invalid Input');
+        }
+    });
+
 });
