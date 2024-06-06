@@ -12,7 +12,7 @@ exports.register = (req, res) => {
     const idGen = new IDGenerator();
     const { first_name, last_name, email, password, phone_number } = req.body;
     const hashed_password = hasher.hashPassword(password);
-    req.body.password = null; // Setting to null
+    req.body.password = 'null'; // Setting to null
     console.log(hashed_password);
     const id = idGen.generateID();
     const query = "INSERT INTO Users(id, first_name, last_name, email, password, phone_number) VALUES($1, $2, $3, $4, $5, $6) RETURNING *";
