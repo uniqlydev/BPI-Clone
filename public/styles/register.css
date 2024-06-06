@@ -266,3 +266,10 @@ nav ul li a {
     font-weight: 700;
     text-decoration: none;
 }
+
+.error, .input-control {
+    color: red;
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 14px;
+}

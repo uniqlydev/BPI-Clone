@@ -68,7 +68,7 @@ const validateInputs = () => {
 
     // Confirm Password Validation
     if (valid_confirmPassword === '') {
-        setError(confirmPassword, 'Confirm Password cannot be blank');
+        setError(confirmPassword, 'Passwords do not match');
         isValid = false;
     } else if (valid_password !== valid_confirmPassword) {
         setError(confirmPassword, 'Passwords do not match');
