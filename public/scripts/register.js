@@ -1,3 +1,5 @@
+const { register } = require("module");
+
 const setError = (element, message) => {
     const inputControl = element.parentElement;
     const errorDisplay = inputControl.querySelector('.error');
@@ -17,18 +19,18 @@ const setSuccess = element => {
 };
 
 const validateInputs = () => {
-    const first_name = document.getElementById('first-name');
-    const last_name = document.getElementById('last-name');
+    const first_name = document.getElementById('first_name');
+    const last_name = document.getElementById('last_name');
     const password = document.getElementById('password');
-    const confirmPassword = document.getElementById('confirm-password');
-    const mobile_number = document.getElementById('mobile-number');
+    const confirmPassword = document.getElementById('confirmpassword');
+    const mobile = document.getElementById('mobile');
     const email = document.getElementById('email');
     
     const valid_first_name = first_name.value.trim();
     const valid_last_name = last_name.value.trim();
     const valid_password = password.value.trim();
     const valid_confirmPassword = confirmPassword.value.trim();
-    const valid_mobile_number = mobile_number.value.trim();
+    const valid_mobile_number = mobile.value.trim();
     const valid_email = email.value.trim();
 
     let isValid = true;
@@ -79,7 +81,7 @@ const validateInputs = () => {
 
     // Mobile Number Validation
     if (valid_mobile_number === '') {
-        setError(mobile_number, 'Mobile number cannot be blank');
+        setError(mobile, 'Mobile number cannot be blank');
         isValid = false;
     } else if(!isValidMobileNumber(valid_mobile_number)){
         setError(mobile_number, "Provide a valid mobile number");
@@ -114,9 +116,9 @@ const isValidPassword = password => {
     return re.test(String(password));
 };
 
-const isValidMobileNumber = mobile_number => {
+const isValidMobileNumber = mobile => {
     const re = /^(\+639\d{9}|^09\d{9})$/;
-    return re.test(String(mobile_number));
+    return re.test(String(mobile));
 }
 
 const isValidEmail = email => {
@@ -128,10 +130,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
     const submitbtn = document.getElementById('submit');
 
-    submitbtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (validateInputs()) {
-            registerForm.submit();
-        }
-    });
+    
+    // Create fetch request /api/users/register
+    fetch('/api/users/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            firstname: registerForm.first_name.value,
+            lastname: registerForm.last_name.value,
+            password: registerForm.password.value,
+            mobile: registerForm.mobile.value,
+            email: registerForm.email.value
+
+        }) 
+    }).then(response => response.json())
 });
