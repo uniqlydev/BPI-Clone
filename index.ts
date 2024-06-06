@@ -10,7 +10,6 @@ import helmet from 'helmet'
 import rate_limiter from 'express-rate-limit'
 
 
-
 // Loading SSL cert and key from dotenv
 const private_key = fs.readFileSync(path.resolve(__dirname, 'server.key'),'utf-8');
 const certificate = fs.readFileSync(path.resolve(__dirname, 'server.cert'), 'utf8');

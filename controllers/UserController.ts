@@ -1,3 +1,4 @@
+import { register } from 'module';
 import User from '../model/User';
 const pool = require('../model/database');
 const IDGenerator = require('../utils/IDGenerator');
