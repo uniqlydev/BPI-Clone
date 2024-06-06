@@ -5,9 +5,9 @@ import path from 'path'
 import https from 'https'
 import fs from 'fs'
 import session from 'express-session'
-import RS from '././utils/RandomString'
 import helmet from 'helmet'
 import rate_limiter from 'express-rate-limit'
+import * as crypto from 'crypto';
 
 
 // Loading SSL cert and key from dotenv
@@ -26,8 +26,8 @@ app.use(bodyParser.json())
 
 // Setup rate limiter to prevent brute force attacks
 const limiter = rate_limiter({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 5 // limit each IP to 5 requests per windowMs
+  windowMs: 15 * 60 * 1000, // 1 minute
+  max: 100 // limit each IP to 5 requests per windowMs
 });
 
 // Setup helmet to block XSS attacks
@@ -43,18 +43,23 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const secret = crypto.randomBytes(32).toString('hex');
 
-app.use(session({
-  secret: '123',
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    secure: true,
-    httpOnly: true,
-    maxAge: 3600000 // last for only 1 hour
-  }
-}))
-
+try {
+  app.use(session({
+    secret: secret,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      secure: true,
+      httpOnly: true,
+      maxAge: 3600000 // last for only 1 hour
+    }
+  })) 
+}catch (e) {
+  console.error('Error setting up session:', e);
+  throw new Error('Failed to set up session');
+}
 
 // Routes
 app.use('/api/users', require('./routers/userRouter'));

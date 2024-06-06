@@ -1,8 +1,9 @@
-"use strict";
 const uniqid = require('uniqid');
+
 class IDGenerator {
-    generateID() {
+    public generateID():String {
         return "user-" + uniqid();
     }
 }
-module.exports = IDGenerator;
+
+module.exports = IDGenerator; 
