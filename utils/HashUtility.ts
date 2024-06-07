@@ -8,7 +8,7 @@ class HashUtility {
         this.salt = salt;
     }
 
-    public async hashPassword(password: string): Promise<string> {
+    public async hashPassword(password: string): Promise<String> {
         try {
             const hash = await bcrypt.hash(password, this.salt);
             return hash;
@@ -21,4 +21,4 @@ class HashUtility {
     
 }
 
-module.exports = HashUtility;
+export default HashUtility;

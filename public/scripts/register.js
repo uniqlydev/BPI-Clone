@@ -145,7 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     last_name: last_name.value,
                     password: password.value,
                     email:email.value,
-                    phone_number: mobile.value
+                    phone_number: mobile.value,
+                    confirm_password: confirmPassword.value
                 })
             }).then(response => {
                 if (response.ok) {
