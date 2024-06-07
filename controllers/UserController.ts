@@ -4,7 +4,9 @@ const pool = require('../model/database');
 const IDGenerator = require('../utils/IDGenerator');
 const Hash = require('../utils/HashUtility')
 
-exports.register = (req: { body: { password: String; first_name?: String; last_name?: String; email?: String; phone_number?: String; }; }, res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
+const bcrypt = require('bcrypt');
+
+exports.register =  async (req: { body: { password: String; first_name?: String; last_name?: String; email?: String; phone_number?: String; }; }, res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
 
     const hasher = new Hash();
     const idGen = new IDGenerator();
@@ -36,6 +38,9 @@ exports.register = (req: { body: { password: String; first_name?: String; last_n
     });
 };
 
+
+
+
 exports.getUser = (req:any,res: any) => {
     // Retrieve all users
     const query = "SELECT email FROM Users;"
@@ -53,3 +58,39 @@ exports.getUser = (req:any,res: any) => {
         }
     });
 };
+
+
+exports.login = (req: { body: { email: String; password: String; }; }, res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
+    const { email, password } = req.body;
+
+    const query = "SELECT * FROM Users WHERE email = $1";
+    
+    pool.query(query, [email], (err: string, result: { rows: string | any[]; }) => {
+        if (err) {
+            console.error('Error executing query', err); // Log the error for debugging
+            return res.status(400).send(err); // Send the error in the response
+        }
+        if (result && result.rows && result.rows.length > 0) {
+            const user = result.rows[0];
+            bcrypt.compare(password, user.password, (err: any, isMatch: any) => {
+                if (err) {
+                    console.error('Error comparing passwords', err); // Log the error for debugging
+                    return res.status(500).send('Server error'); // Send a server error response
+                }
+                if (isMatch) {
+                    // Passwords match
+                    return res.status(200).send(`User logged in with ID: ${user.id}`);
+                } else {
+                    // Passwords do not match
+                    console.error('Invalid email or password'); // Log the issue for debugging
+                    return res.status(400).send('Invalid email or password.');
+                }
+            });
+        } else {
+            // No user found with the given email
+            console.error('Invalid email or password'); // Log the issue for debugging
+            return res.status(400).send('Invalid email or password.');
+        }
+    });
+};
+

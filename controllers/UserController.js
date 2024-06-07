@@ -7,7 +7,8 @@ const User_1 = __importDefault(require("../model/User"));
 const pool = require('../model/database');
 const IDGenerator = require('../utils/IDGenerator');
 const Hash = require('../utils/HashUtility');
-exports.register = (req, res) => {
+const bcrypt = require('bcrypt');
+exports.register = async (req, res) => {
     const hasher = new Hash();
     const idGen = new IDGenerator();
     const { first_name, last_name, email, password, phone_number } = req.body;
@@ -45,6 +46,39 @@ exports.getUser = (req, res) => {
         else {
             console.error('No rows returned'); // Log the issue for debugging
             return res.status(400).send('No users found.');
+        }
+    });
+};
+exports.login = (req, res) => {
+    const { email, password } = req.body;
+    const query = "SELECT * FROM Users WHERE email = $1";
+    pool.query(query, [email], (err, result) => {
+        if (err) {
+            console.error('Error executing query', err); // Log the error for debugging
+            return res.status(400).send(err); // Send the error in the response
+        }
+        if (result && result.rows && result.rows.length > 0) {
+            const user = result.rows[0];
+            bcrypt.compare(password, user.password, (err, isMatch) => {
+                if (err) {
+                    console.error('Error comparing passwords', err); // Log the error for debugging
+                    return res.status(500).send('Server error'); // Send a server error response
+                }
+                if (isMatch) {
+                    // Passwords match
+                    return res.status(200).send(`User logged in with ID: ${user.id}`);
+                }
+                else {
+                    // Passwords do not match
+                    console.error('Invalid email or password'); // Log the issue for debugging
+                    return res.status(400).send('Invalid email or password.');
+                }
+            });
+        }
+        else {
+            // No user found with the given email
+            console.error('Invalid email or password'); // Log the issue for debugging
+            return res.status(400).send('Invalid email or password.');
         }
     });
 };
