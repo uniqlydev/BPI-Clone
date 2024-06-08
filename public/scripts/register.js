@@ -141,12 +141,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    first_name: first_name.value,
-                    last_name: last_name.value,
-                    password: password.value,
-                    email:email.value,
-                    phone_number: mobile.value,
-                    confirm_password: confirmPassword.value
+                    first_name: registerForm.first_name.value,
+                    last_name: registerForm.last_name.value,
+                    password: registerForm.password.value, 
+                    email: registerForm.email.value,
+                    phone_number: registerForm.mobile.value,
+                    confirm_password: registerForm.confirmpassword.value
                 })
             }).then(response => {
                 if (response.ok) {
