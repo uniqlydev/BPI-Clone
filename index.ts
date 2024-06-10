@@ -8,6 +8,8 @@ import session from 'express-session'
 import helmet from 'helmet'
 import rate_limiter from 'express-rate-limit'
 import * as crypto from 'crypto';
+import csrf from 'csurf';
+
 
 
 // Loading SSL cert and key from dotenv
@@ -25,14 +27,14 @@ const app = express()
 app.use(bodyParser.json())
 
 // Setup rate limiter to prevent brute force attacks
-const limiter = rate_limiter({
-  windowMs: 15 * 60 * 1000, // 1 minute
-  max: 100 // limit each IP to 5 requests per windowMs
+const apiLimiter = rate_limiter({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 3, // limit each IP to 3 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
 });
 
 // Setup helmet to block XSS attacks
 app.use(helmet());
-app.use(limiter);
 
 
 app.use(cors());
@@ -55,11 +57,17 @@ try {
       httpOnly: true,
       maxAge: 3600000 // last for only 1 hour
     }
-  })) 
+  }))
+  
+  app.use(csrf()); 
 }catch (e) {
   console.error('Error setting up session:', e);
   throw new Error('Failed to set up session');
 }
+
+
+
+app.use('/api', apiLimiter);
 
 // Routes
 app.use('/api/users', require('./routers/userRouter'));

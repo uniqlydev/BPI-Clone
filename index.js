@@ -36,6 +36,7 @@ const express_session_1 = __importDefault(require("express-session"));
 const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const crypto = __importStar(require("crypto"));
+const csurf_1 = __importDefault(require("csurf"));
 // Loading SSL cert and key from dotenv
 const private_key = fs_1.default.readFileSync(path_1.default.resolve(__dirname, 'server.key'), 'utf-8');
 const certificate = fs_1.default.readFileSync(path_1.default.resolve(__dirname, 'server.cert'), 'utf8');
@@ -47,13 +48,13 @@ const server_credentials = {
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.json());
 // Setup rate limiter to prevent brute force attacks
-const limiter = (0, express_rate_limit_1.default)({
-    windowMs: 15 * 60 * 1000, // 1 minute
-    max: 100 // limit each IP to 5 requests per windowMs
+const apiLimiter = (0, express_rate_limit_1.default)({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 3, // limit each IP to 3 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.'
 });
 // Setup helmet to block XSS attacks
 app.use((0, helmet_1.default)());
-app.use(limiter);
 app.use((0, cors_1.default)());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(express_1.default.json());
@@ -72,11 +73,13 @@ try {
             maxAge: 3600000 // last for only 1 hour
         }
     }));
+    app.use((0, csurf_1.default)());
 }
 catch (e) {
     console.error('Error setting up session:', e);
     throw new Error('Failed to set up session');
 }
+app.use('/api', apiLimiter);
 // Routes
 app.use('/api/users', require('./routers/userRouter'));
 app.get('/', async (req, res) => {
