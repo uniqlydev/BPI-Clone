@@ -71,6 +71,7 @@ app.use('/api', apiLimiter);
 
 // Routes
 app.use('/api/users', require('./routers/userRouter'));
+app.use('/api/admin', require('./routers/adminRouter'));
 
 
 app.get('/', async (req: any, res: { render: (arg0: string) => void }) => {
