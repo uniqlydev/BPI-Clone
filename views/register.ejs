@@ -23,9 +23,9 @@
             <h1>BPI</h1>
         </div>
         <div class="register-form">
-            <h1>Bank with BPI </h1>
+            <h1>Bank with BPI</h1>
             <h2>Join Us Today!</h2>
-            <form method="POST" id="registerForm">
+            <form method="POST" id="registerForm" enctype="multipart/form-data">
                 <div class="name-container">
                     <div class="inputControl">
                         <input type="text" name="first_name" placeholder="First Name" id="first_name">
@@ -36,23 +36,28 @@
                         <div class="error"></div>
                     </div>
                 </div>
-                    <div class="inputControl">
-                        <input type="password" name="password" placeholder="Password" id="password">
-                        <div class="error"></div>
-                    </div>
-                    <div class="inputControl">
-                        <input type="password" name="confirmpassword" placeholder="Confirm Password" id="confirmpassword">
-                        <div class="error"></div>
-                    </div>
-                    <div class="inputControl">
-                        <input type ="text" name="mobile" placeholder="Mobile Number (+639) or (09)" id="mobile">
-                        <div class="error"></div>
-                    </div>
-                    <div class="inputControl">
-                        <input type ="text" name="email" placeholder="Email" id="email">
-                        <div class="error"></div>
-                    </div>
-                <input id="submit" type="button"> Register </button>
+                <div class="inputControl">
+                    <input type="password" name="password" placeholder="Password" id="password">
+                    <div class="error"></div>
+                </div>
+                <div class="inputControl">
+                    <input type="password" name="confirmpassword" placeholder="Confirm Password" id="confirmpassword">
+                    <div class="error"></div>
+                </div>
+                <div class="inputControl">
+                    <input type="text" name="mobile" placeholder="Mobile Number (+639) or (09)" id="mobile">
+                    <div class="error"></div>
+                </div>
+                <div class="inputControl">
+                    <input type="text" name="email" placeholder="Email" id="email">
+                    <div class="error"></div>
+                </div>
+                <div class="inputControl">
+                    <label for="profile_picture">Profile Picture</label>
+                    <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
+                    <div class="error"></div>
+                </div>
+                <button id="submit" type="button">Register</button>
             </form>
         </div>
         <div class="divider">
@@ -61,9 +66,8 @@
             <div class="divide"></div>
         </div>
         <div class="register-container">
-            <button type = "submit" class="register" id="Log-In">Log In</button>
+            <button type="submit" class="register" id="Log-In">Log In</button>
         </div>
-
         <div class="inquiries">
             <h1>Show inquiries and other services</h1>
         </div>
