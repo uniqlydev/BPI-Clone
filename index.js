@@ -36,7 +36,6 @@ const express_session_1 = __importDefault(require("express-session"));
 const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const crypto = __importStar(require("crypto"));
-const csurf_1 = __importDefault(require("csurf"));
 // Loading SSL cert and key from dotenv
 const private_key = fs_1.default.readFileSync(path_1.default.resolve(__dirname, 'server.key'), 'utf-8');
 const certificate = fs_1.default.readFileSync(path_1.default.resolve(__dirname, 'server.cert'), 'utf8');
@@ -73,7 +72,7 @@ try {
             maxAge: 3600000 // last for only 1 hour
         }
     }));
-    app.use((0, csurf_1.default)());
+    // app.use(csrf()); 
 }
 catch (e) {
     console.error('Error setting up session:', e);
@@ -87,6 +86,9 @@ app.get('/', async (req, res) => {
 });
 app.get('/register', (req, res) => {
     res.render('register');
+});
+app.get('/admin', (req, res) => {
+    res.render('admin_login');
 });
 const httpsServer = https_1.default.createServer(server_credentials, app);
 httpsServer.listen(443, () => {

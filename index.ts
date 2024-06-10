@@ -59,7 +59,7 @@ try {
     }
   }))
   
-  app.use(csrf()); 
+  // app.use(csrf()); 
 }catch (e) {
   console.error('Error setting up session:', e);
   throw new Error('Failed to set up session');
@@ -80,6 +80,10 @@ app.get('/', async (req: any, res: { render: (arg0: string) => void }) => {
 
 app.get('/register', (req: any, res: { render: (arg0: string) => void }) => {
     res.render('register');
+});
+
+app.get('/admin', (req: any, res: { render: (arg0: string) => void }) => {
+    res.render('admin_login');
 });
 
 const httpsServer = https.createServer(server_credentials,app);

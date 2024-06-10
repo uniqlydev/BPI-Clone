@@ -47,7 +47,21 @@ exports.register =  async (req: { body: { password: string; first_name?: string;
                 return res.status(400).send(err); // Send the error in the response
             }
             if (result && result.rows && result.rows.length > 0) {
-                return res.status(201).send(`User added with ID: ${result.rows[0].password}`);
+                const log = "INSERT INTO user_activity_audit (id, user_id, activity, end_point, created_at) VALUES($1, $2, $3, $4, $5) RETURNING *";
+
+                pool.query(log, [1, user.getID(), 'create', '/api/users/register', new Date()], (err: string, result: { rows: string | any[]; }) => {
+                    if (err) {
+                        console.error('Error executing query', err); // Log the error for debugging
+                        return res.status(400).send(err); // Send the error in the response
+                    }
+                    if (result && result.rows && result.rows.length > 0) {
+                        return res.status(201).send('User added successfully');
+                    } else {
+                        console.error('No rows returned'); // Log the issue for debugging
+                        return res.status(400).send('User activity could not be logged.');
+                    }
+                });
+
             } else {
                 console.error('No rows returned'); // Log the issue for debugging
                 return res.status(400).send('User could not be added.');
