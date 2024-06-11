@@ -18,6 +18,16 @@ class HashUtility {
         }
     }
 
+    public async comparePassword(password: string, hash: string): Promise<Boolean> {
+        try {
+            const isValid = await bcrypt.compare(password, hash);
+            return isValid;
+        }catch (err) {
+            console.error('Error comparing password:', err);
+            throw new Error('Failed to compare password');
+        }
+    }
+
     
 }
 

@@ -7,6 +7,7 @@ const User_1 = __importDefault(require("../model/User"));
 const database_1 = __importDefault(require("../model/database"));
 const IDGenerator_1 = __importDefault(require("../utils/IDGenerator"));
 const HashUtility_1 = __importDefault(require("../utils/HashUtility"));
+const Validator_1 = __importDefault(require("../utils/Validator"));
 const express_validator_1 = require("express-validator");
 const validate_sanitize = [
     (0, express_validator_1.body)('email').isEmail().withMessage("Invalid email address").normalizeEmail(),
@@ -68,34 +69,34 @@ exports.getUser = (req, res) => {
         }
     });
 };
-// exports.login = (req: { body: { email: String; password: String; }; }, res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
-//     const { email, password } = req.body;
-//     const query = "SELECT * FROM Users WHERE email = $1";
-//     pool.query(query, [email], (err: string, result: { rows: string | any[]; }) => {
-//         if (err) {
-//             console.error('Error executing query', err); // Log the error for debugging
-//             return res.status(400).send(err); // Send the error in the response
-//         }
-//         if (result && result.rows && result.rows.length > 0) {
-//             const user = result.rows[0];
-//             bcrypt.compare(password, user.password, (err: any, isMatch: any) => {
-//                 if (err) {
-//                     console.error('Error comparing passwords', err); // Log the error for debugging
-//                     return res.status(500).send('Server error'); // Send a server error response
-//                 }
-//                 if (isMatch) {
-//                     // Passwords match
-//                     return res.status(200).send(`User logged in with ID: ${user.id}`);
-//                 } else {
-//                     // Passwords do not match
-//                     console.error('Invalid email or password'); // Log the issue for debugging
-//                     return res.status(400).send('Invalid email or password.');
-//                 }
-//             });
-//         } else {
-//             // No user found with the given email
-//             console.error('Invalid email or password'); // Log the issue for debugging
-//             return res.status(400).send('Invalid email or password.');
-//         }
-//     });
-// };
+exports.login = (req, res) => {
+    // Sanitize
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).send("Invalid input");
+    }
+    if (Validator_1.default.isEmail(req.body.email) === false)
+        return res.status(400).send("Invalid email address");
+    const query = "SELECT * FROM Users WHERE email = $1";
+    database_1.default.query(query, [req.body.email], async (err, result) => {
+        if (err) {
+            console.error('Error executing query', err); // Log the error for debugging
+            return res.status(400).send(err); // Send the error in the response
+        }
+        if (result && result.rows && result.rows.length > 0) {
+            const user = result.rows[0];
+            const hasher = new HashUtility_1.default();
+            const isValid = await hasher.comparePassword(req.body.password, user.password);
+            if (isValid) {
+                return res.status(200).send('Login successful');
+            }
+            else {
+                return res.status(400).send('Invalid credentials');
+            }
+        }
+        else {
+            console.error('No rows returned'); // Log the issue for debugging
+            return res.status(400).send('User not found.');
+        }
+    });
+};

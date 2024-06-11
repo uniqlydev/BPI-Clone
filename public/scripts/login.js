@@ -18,11 +18,13 @@ const setSuccess = element => {
 };
 
 const validateInputs = () => {
-    const username = document.getElementById('username');
-    const password = document.getElementById('password');
-    
+    const username = document.getElementById('inp_user');
+    const password = document.getElementById('inp_pass');
+
     const valid_username = username.value.trim();
     const valid_password = password.value.trim();
+
+
     let isValid = true;
 
 
@@ -64,7 +66,6 @@ const isValidPassword = password => {
 };
 
 
-
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const submitbtn = document.getElementById('submit');
@@ -73,10 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         if (validateInputs() == true) {
+            // Generate a CSRF token and include it in the request header
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
             fetch('/api/users/login', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken
                 },
                 body: JSON.stringify({
                     email: username.value,
@@ -86,7 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong');
+                    setError(username, 'Invalid username or password');
+                    setError(password, 'Invalid username or password');
                 }
             }).then(data => {
                 console.log(data);
@@ -94,9 +100,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }).catch(error => {
                 console.log(error);
             });
-        }else {
+        } else {
             alert('Invalid Input');
         }
     });
 
 });
+
+// Function to escape special characters to prevent XSS
+const escapeHtml = (unsafe) => {
+    return unsafe.replace(/[&<"']/g, (m) => {
+        switch (m) {
+            case '&':
+                return '&amp;';
+            case '<':
+                return '&lt;';
+            case '>':
+                return '&gt;';
+            case '"':
+                return '&quot;';
+            case "'":
+                return '&#039;';
+        }
+    });
+};
+

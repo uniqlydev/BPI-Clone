@@ -198,7 +198,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             fetch('/api/users/register', {
                 method: 'POST',
+<<<<<<< HEAD
                 body: formData
+=======
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    first_name: registerForm.first_name.value,
+                    last_name: registerForm.last_name.value,
+                    password: registerForm.password.value, 
+                    email: registerForm.email.value,
+                    phone_number: registerForm.mobile.value,
+                    confirm_password: registerForm.confirmpassword.value
+                })
+>>>>>>> 1ca61c97b0e74f3fa33203b409409170f91e20be
             }).then(response => {
                 if (response.ok) {
                     return response.json();
