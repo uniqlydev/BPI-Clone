@@ -45,9 +45,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const secret = process.env.SESSION_SECRET
 
+const secret_uninitialized = require('crypto').randomBytes(64).toString('hex');
+
+console.log('Secret:', secret_uninitialized);
+
 try {
   app.use(session({
-    secret: secret,
+    secret: secret || secret_uninitialized,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -55,7 +59,7 @@ try {
       httpOnly: true,
       maxAge: 3600000 // last for only 1 hour
     }
-  }))
+}))
 
 }catch (e) {
   console.error('Error setting up session:', e);

@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -35,8 +12,6 @@ const fs_1 = __importDefault(require("fs"));
 const express_session_1 = __importDefault(require("express-session"));
 const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
-const crypto = __importStar(require("crypto"));
-const csurf_1 = __importDefault(require("csurf"));
 // Loading SSL cert and key from dotenv
 const private_key = fs_1.default.readFileSync(path_1.default.resolve(__dirname, 'server.key'), 'utf-8');
 const certificate = fs_1.default.readFileSync(path_1.default.resolve(__dirname, 'server.cert'), 'utf8');
@@ -61,10 +36,12 @@ app.use(express_1.default.json());
 app.set('view engine', 'ejs');
 app.set('views', path_1.default.join(__dirname, 'views'));
 app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
-const secret = crypto.randomBytes(32).toString('hex');
+const secret = process.env.SESSION_SECRET;
+const secret_uninitialized = require('crypto').randomBytes(64).toString('hex');
+console.log('Secret:', secret_uninitialized);
 try {
     app.use((0, express_session_1.default)({
-        secret: secret,
+        secret: secret || secret_uninitialized,
         resave: false,
         saveUninitialized: true,
         cookie: {
@@ -73,7 +50,6 @@ try {
             maxAge: 3600000 // last for only 1 hour
         }
     }));
-    app.use((0, csurf_1.default)());
 }
 catch (e) {
     console.error('Error setting up session:', e);
