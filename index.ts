@@ -7,8 +7,6 @@ import fs from 'fs'
 import session from 'express-session'
 import helmet from 'helmet'
 import rate_limiter from 'express-rate-limit'
-import * as crypto from 'crypto';
-import csrf from 'csurf';
 
 
 
@@ -45,7 +43,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const secret = crypto.randomBytes(32).toString('hex');
+const secret = process.env.SESSION_SECRET
 
 try {
   app.use(session({
@@ -58,8 +56,7 @@ try {
       maxAge: 3600000 // last for only 1 hour
     }
   }))
-  
-  app.use(csrf()); 
+
 }catch (e) {
   console.error('Error setting up session:', e);
   throw new Error('Failed to set up session');
