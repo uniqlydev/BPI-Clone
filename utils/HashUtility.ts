@@ -8,7 +8,7 @@ class HashUtility {
         this.salt = salt;
     }
 
-    public async hashPassword(password: string): Promise<string> {
+    public async hashPassword(password: string): Promise<String> {
         try {
             const hash = await bcrypt.hash(password, this.salt);
             return hash;
@@ -18,7 +18,17 @@ class HashUtility {
         }
     }
 
+    public async comparePassword(password: string, hash: string): Promise<Boolean> {
+        try {
+            const isValid = await bcrypt.compare(password, hash);
+            return isValid;
+        }catch (err) {
+            console.error('Error comparing password:', err);
+            throw new Error('Failed to compare password');
+        }
+    }
+
     
 }
 
-module.exports = HashUtility;
+export default HashUtility;

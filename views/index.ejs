@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="styles/colors.css">
     <link rel="stylesheet" href="styles/fonts.css">
     <link rel="stylesheet" href="styles/index.css"> 
-
+    <script src = "scripts/login.js"></script>
     <script defer>
         document.addEventListener('contextmenu', event => {
             event.preventDefault();
@@ -33,10 +33,16 @@
         </div>
         <div class="login-form">
             <h1>Welcome!</h1>
-            <form action="">
-                <input type="text" name="username" placeholder="Username">
-                <input type="password" name="password" placeholder="Password">
-                <input type="submit" value="Log In">
+            <form action="" class = "loginForm">
+                <div class="inputControl">
+                    <input type="text" name="username" placeholder="Username" id="inp_user">
+                    <div class="error"></div>
+                </div>
+                <div class="inputControl">    
+                    <input type="password" name="password" id="inp_pass" placeholder="Password">
+                    <div class="error"></div>
+                </div>
+                <button id="submit" type="button"> Login </button>
             </form>
             <div class="forgot-container">
                 <p>Forgot <span class="credentials">username</span> or <span class="credentials">password</span></p>

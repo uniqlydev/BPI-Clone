@@ -18,5 +18,15 @@ class HashUtility {
             throw new Error('Failed to hash password');
         }
     }
+    async comparePassword(password, hash) {
+        try {
+            const isValid = await bcrypt_1.default.compare(password, hash);
+            return isValid;
+        }
+        catch (err) {
+            console.error('Error comparing password:', err);
+            throw new Error('Failed to compare password');
+        }
+    }
 }
-module.exports = HashUtility;
+exports.default = HashUtility;

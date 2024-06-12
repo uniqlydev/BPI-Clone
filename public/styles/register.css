@@ -65,7 +65,7 @@ aside .name-container{
     display: flex;
     flex-direction: row;
     gap: 40px;
-    max-width: fit-content;
+    max-width: max-content;
 
 }
 
@@ -86,17 +86,7 @@ aside form input[type="text"]:focus, aside form input[type="password"]:focus {
     outline: none;
 }
 
-aside form input[type="submit"] {
-    padding: 15px;
-    background-color: var(--button-primary);
-    color: white;
-    font-family: var(--font-body);
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 18px;
-}
+
 
 aside .forgot-container {
     /* Center in aside */
@@ -272,4 +262,17 @@ nav ul li a {
     font-family: var(--font-body);
     font-weight: 400;
     font-size: 14px;
+    width: 100%;
+}
+
+#submit {
+    padding: 15px;
+    background-color: var(--button-primary);
+    color: white;
+    font-family: var(--font-body);
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 18px;
 }
