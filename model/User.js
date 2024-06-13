@@ -1,13 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class User {
-    constructor(id, first_name, last_name, email, password, phone) {
+    constructor(id, first_name, last_name, email, password, phone, profile_picture) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;
         this.email = email;
         this.password = password;
         this.phone = phone;
+        this.profile_picture = profile_picture;
         this.role = "user";
     }
     getID() {
@@ -30,6 +31,9 @@ class User {
     }
     getRole() {
         return this.role;
+    }
+    getProfilePicture() {
+        return this.profile_picture;
     }
 }
 exports.default = User;

@@ -7,6 +7,7 @@ import fs from 'fs'
 import session from 'express-session'
 import helmet from 'helmet'
 import rate_limiter from 'express-rate-limit'
+import morgan from 'morgan'
 
 
 
@@ -23,6 +24,8 @@ const server_credentials = {
 
 const app = express()
 app.use(bodyParser.json())
+
+
 
 // Setup rate limiter to prevent brute force attacks
 const apiLimiter = rate_limiter({
@@ -42,6 +45,7 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 const secret = process.env.SESSION_SECRET
 
@@ -68,7 +72,7 @@ try {
 
 
 
-app.use('/api', apiLimiter);
+// app.use('/api', apiLimiter);
 
 // Routes
 app.use('/api/users', require('./routers/userRouter'));
@@ -83,6 +87,9 @@ app.get('/register', (req: any, res: { render: (arg0: string) => void }) => {
     res.render('register');
 });
 
+app.get('/profile', (req: any, res: { render: (arg0: string) => void }) => {
+  res.render('upload');
+});
 const httpsServer = https.createServer(server_credentials,app);
 
 httpsServer.listen(443, () => {

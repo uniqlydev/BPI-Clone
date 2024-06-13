@@ -55,7 +55,7 @@ catch (e) {
     console.error('Error setting up session:', e);
     throw new Error('Failed to set up session');
 }
-app.use('/api', apiLimiter);
+// app.use('/api', apiLimiter);
 // Routes
 app.use('/api/users', require('./routers/userRouter'));
 app.get('/', async (req, res) => {
@@ -63,6 +63,9 @@ app.get('/', async (req, res) => {
 });
 app.get('/register', (req, res) => {
     res.render('register');
+});
+app.get('/profile', (req, res) => {
+    res.render('upload');
 });
 const httpsServer = https_1.default.createServer(server_credentials, app);
 httpsServer.listen(443, () => {
