@@ -5,7 +5,6 @@ import path from 'path'
 import https from 'https'
 import fs from 'fs'
 import session from 'express-session'
-import helmet from 'helmet'
 import rate_limiter from 'express-rate-limit'
 import morgan from 'morgan'
 
@@ -24,7 +23,7 @@ const server_credentials = {
 
 const app = express()
 app.use(bodyParser.json())
-
+app.use(morgan('dev'));
 
 
 // Setup rate limiter to prevent brute force attacks
@@ -34,8 +33,6 @@ const apiLimiter = rate_limiter({
   message: 'Too many requests from this IP, please try again later.'
 });
 
-// Setup helmet to block XSS attacks
-app.use(helmet());
 
 
 app.use(cors());
@@ -47,15 +44,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-const secret = process.env.SESSION_SECRET
-
-const secret_uninitialized = require('crypto').randomBytes(64).toString('hex');
-
-console.log('Secret:', secret_uninitialized);
 
 try {
   app.use(session({
-    secret: secret || secret_uninitialized,
+    secret: process.env.SESSION_SECRET || require('crypto').randomBytes(64).toString('hex'),
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -79,7 +71,9 @@ app.use('/api/users', require('./routers/userRouter'));
 
 
 app.get('/', async (req: any, res: { render: (arg0: string) => void }) => {
-    
+
+    console.log('Session:', req.session.user);
+
     res.render('index');
 });
 
@@ -88,6 +82,7 @@ app.get('/register', (req: any, res: { render: (arg0: string) => void }) => {
 });
 
 app.get('/profile', (req: any, res: { render: (arg0: string) => void }) => {
+
   res.render('upload');
 });
 const httpsServer = https.createServer(server_credentials,app);

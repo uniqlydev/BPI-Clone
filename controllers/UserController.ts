@@ -6,10 +6,14 @@ import Validator from '../utils/Validator';
 import { body, validationResult } from 'express-validator';
 import multer from 'multer';
 import RegisterRequest from '../interfaces/RegisterRequest';
+import LoginRequest from '../interfaces/LoginRequest';
+import { Request, Response } from 'express';
 
 
 
-exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
+exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) => {
+    json(arg0: { message: string; }): unknown; (): any; new(): any; send: { (arg0: string): any; new(): any; }; 
+}; }) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -35,17 +39,23 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
         try {
             const client = await pool.connect();
             const query = `
-              INSERT INTO users (id, first_name, last_name, email, password, phone_number, profile_picture)
+              INSERT INTO users (id, first_name, last_name, email, password, phone_number)
               VALUES ($1, $2, $3, $4, $5, $6)
             `;
             const values = [id, first_name, last_name, email, hashed_password, phone_number];
             await client.query(query, values);
             await client.release();
-        
-            res.status(200).send('User registered successfully.');
+
+            // Put in session
+            req.session.user = {
+                email: email,
+                authenticated: true
+            };
+
+            res.status(201).json({ message: 'User created successfully' });
           } catch (error) {
             console.error('Error executing query:', error);
-            res.status(500).send('Internal Server Error');
+            res.status(500).json({ message: 'An error occurred' });
         }
     }catch(err){
         console.error('Error executing query', err); // Log the error for debugging
@@ -54,26 +64,7 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
 };
 
 
-exports.getUser = (req:any,res: any) => {
-    // Retrieve all users
-    const query = "SELECT email FROM Users;"
-
-    pool.query(query, (err: string, result: { rows: any; }) => {
-        if (err) {
-            console.error('Error executing query', err); // Log the error for debugging
-            return res.status(400).send(err); // Send the error in the response
-        }
-        if (result && result.rows && result.rows.length > 0) {
-            return res.status(200).send(result.rows);
-        } else {
-            console.error('No rows returned'); // Log the issue for debugging
-            return res.status(400).send('No users found.');
-        }
-    });
-};
-
-
-exports.login = (req: any, res: any) => {
+exports.login = (req: LoginRequest & Request, res: Response) => {
 
     // Sanitize
     const errors = validationResult(req);
@@ -85,41 +76,60 @@ exports.login = (req: any, res: any) => {
     if (Validator.isEmail(req.body.email) === false) 
         return res.status(400).send("Invalid email address");
 
-    const query = "SELECT * FROM Users WHERE email = $1";
+    // Retrieve the user with the email and password 
+    const user = "SELECT password FROM Users WHERE email = $1 LIMIT 1;"
+    const values = [req.body.email];
 
-    pool.query(query, [req.body.email], async (err: string, result: { rows: any; }) => {
+    pool.query(user, values, async (err: string, result: { rows: any; }) => {
         if (err) {
             console.error('Error executing query', err); // Log the error for debugging
             return res.status(400).send(err); // Send the error in the response
         }
         if (result && result.rows && result.rows.length > 0) {
-            const user = result.rows[0];
+            const hashedPassword = result.rows[0].password;
             const hasher = new Hash();
-            const isValid = await hasher.comparePassword(req.body.password, user.password);
-            if (isValid) {
-                return res.status(200).send('Login successful');
+            const isMatch = await hasher.comparePassword(req.body.password, hashedPassword);
+            if (isMatch) {
+                req.session.user = {
+                    email: req.body.email,
+                    authenticated: true
+                };
+                return res.status(200).json({ message: 'Login successful' });
+
             } else {
-                return res.status(400).send('Invalid credentials');
+                return res.status(400).json({ message: 'Invalid email or password' });
             }
         } else {
-            console.error('No rows returned'); // Log the issue for debugging
-            return res.status(400).send('User not found.');
+            return res.status(400).json({ message: 'Invalid email or password' });
         }
     });
 
+
+
+
 };
 
-// UserController.js
-
-exports.uploadImage = (req: { file: { path: any; }; }, res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): void; new(): any; }; }; }) => {
+exports.uploadImage = (req: Request & { file: { path: string } }, res: Response) => {
     if (!req.file) {
-        return res.status(400).send('No file uploaded.');
+      return res.status(400).send('No file uploaded.');
     }
-
-    const filePath = req.file.path; 
-
-    // Respond with a success message or further processing
-    res.status(200).send('File uploaded successfully.');
-};
-
+  
+    const filePath = req.file.path;
+    const query = "UPDATE Users SET profile_image = $1 WHERE email = $2;";
+  
+    if (req.session && req.session.user) {
+      const values = [filePath, req.session.user.email];
+      pool.query(query, values, (err: string) => {
+        if (err) {
+          console.error('Error executing query', err); // Log the error for debugging
+          return res.status(400).send(err); // Send the error in the response
+        }
+  
+        res.status(200).json({ message: 'File uploaded and user profile updated successfully' });
+      });
+    } else {
+      res.status(400).json({ message: 'User not authenticated' });
+    }
+  };
+  
 
