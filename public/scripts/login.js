@@ -69,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         if (validateInputs() == true) {
-
             fetch('/api/users/login', {
                 method: 'POST',
                 headers: {

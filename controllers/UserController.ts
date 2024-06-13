@@ -35,7 +35,6 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
 
         const id = idGen.generateID();
 
-
         try {
             const client = await pool.connect();
             const query = `

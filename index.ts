@@ -26,6 +26,7 @@ app.use(bodyParser.json())
 app.use(morgan('dev'));
 
 
+
 // Setup rate limiter to prevent brute force attacks
 const apiLimiter = rate_limiter({
   windowMs: 1 * 60 * 1000, // 1 minute
@@ -55,8 +56,9 @@ try {
       httpOnly: true,
       maxAge: 3600000 // last for only 1 hour
     }
+  }))
+  
 }))
-
 }catch (e) {
   console.error('Error setting up session:', e);
   throw new Error('Failed to set up session');
@@ -68,6 +70,7 @@ try {
 
 // Routes
 app.use('/api/users', require('./routers/userRouter'));
+app.use('/api/admin', require('./routers/adminRouter'));
 
 
 app.get('/', async (req: any, res: { render: (arg0: string) => void }) => {
@@ -80,6 +83,20 @@ app.get('/', async (req: any, res: { render: (arg0: string) => void }) => {
 app.get('/register', (req: any, res: { render: (arg0: string) => void }) => {
     res.render('register');
 });
+
+
+app.get('/admin', (req: any, res: { render: (arg0: string) => void }) => {
+  res.render('admin_login');
+});
+
+app.get('/admin/dashboard', (req: any, res) => {
+  console.log('Session user:', req.session.user); // Log session user
+  if (!req.session.user) {
+      return res.redirect('/admin');
+  }
+  res.render('admin_dashboard');
+});
+
 
 app.get('/profile', (req: any, res: { render: (arg0: string) => void }) => {
 

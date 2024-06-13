@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/colors.css">
+    <link rel="stylesheet" href="styles/fonts.css">
+    <link rel="stylesheet" href="styles/admin.css">
+    <title>Admin</title>
+    <script src="scripts/admin_login.js" defer></script>
+</head>
+<body>
+    <!-- Create login form -->
+    <form method="POST" id="adminLoginForm">
+        <h1>Admin Login</h1>
+        <div id="usernameInputControl">
+            <input type="text" name="username" placeholder="Username" id="admin_user">
+            <div class="errorDisplay"></div>
+        </div>
+        <div id="passwordInputControl">
+            <input type="password" name="password" placeholder="Password" id="admin_pass">
+            <div class="errorDisplay"></div>
+        </div>
+        <button type="button" id="admin_submit">Login</button>
+    </form>
+</body>
+</html>
