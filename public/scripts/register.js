@@ -16,7 +16,9 @@ const setSuccess = element => {
     inputControl.classList.remove('error');
 };
 
-const validateInputs = () => {
+
+
+const validateInputs = async () => {
     const first_name = document.getElementById('first_name');
     const last_name = document.getElementById('last_name');
     const password = document.getElementById('password');
@@ -34,7 +36,7 @@ const validateInputs = () => {
     let isValid = true;
 
     // First Name Validation
-    if(valid_first_name === '') {
+    if (valid_first_name === '') {
         setError(first_name, 'First name cannot be blank');
         isValid = false;
     } else if (!isValidFirstName(valid_first_name)) {
@@ -59,22 +61,21 @@ const validateInputs = () => {
     if (valid_password === '') {
         setError(password, 'Password cannot be blank');
         isValid = false;
-    } else if(!isValidPassword(valid_password)){
-        setError(password, "Password should contain at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character, and must be 12-16 characters long");
+    }else if (!isValidPassword(valid_password)) {
+        setError(password, 'Provide a valid password');
         isValid = false;
-    } else {
+    }else {
         setSuccess(password);
     }
+
 
     // Confirm Password Validation
     if (valid_confirmPassword === '') {
         setError(confirmPassword, 'Passwords do not match');
         isValid = false;
-    } else if (valid_password !== valid_confirmPassword) {
+    }else if (valid_password !== valid_confirmPassword) {
         setError(confirmPassword, 'Passwords do not match');
         isValid = false;
-    } else {
-        setSuccess(confirmPassword);
     }
 
     // Mobile Number Validation
@@ -92,6 +93,9 @@ const validateInputs = () => {
     if (valid_email === '') {
         setError(email, 'Email cannot be blank');
         isValid = false;
+    } else if (!isValidEmail(valid_email)) {
+        setError(email, 'Provide a valid email');
+        isValid = false;
     } else {
         setSuccess(email);
     }
@@ -100,41 +104,38 @@ const validateInputs = () => {
 };
 
 const isValidFirstName = first_name => {
-    const re = /^[A-Za-zÑñ  ]{1,30}$/;
+    const re = /^[A-Za-zÑñ ]{1,30}$/;
     return re.test(String(first_name));
 };
 
 const isValidLastName = last_name => {
-    const re = /^[A-Za-zÑñ  ]{1,30}$/;
+    const re = /^[A-Za-zÑñ ]{1,30}$/;
     return re.test(String(last_name));
 };
 
 const isValidPassword = password => {
-    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*_])[A-Za-z\d@$!%*_]{12,16}$/;
-    return re.test(String(password));
+    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*_])[A-Za-z\d@$!%*_]{8,16}$/;
+    return re.test(password);
 };
 
 const isValidMobileNumber = mobile => {
-    const re = /^(\+639\d{9}|^09\d{9})$/;
+    const re = /^(\+639\d{9}|09\d{9})$/;
     return re.test(String(mobile));
-}
+};
 
 const isValidEmail = email => {
     const re = /^[a-zA-Z0-9]+([._-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
     return re.test(String(email));
-}
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
     const submitbtn = document.getElementById('submit');
-    const first_name = document.getElementById('first_name');
-
-    console.log(first_name.value)
 
     submitbtn.addEventListener('click', async (e) => {
         e.preventDefault();
 
-        if (validateInputs() == true) {
+        if (await validateInputs()) {
             fetch('/api/users/register', {
                 method: 'POST',
                 headers: {
@@ -146,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     password: registerForm.password.value, 
                     email: registerForm.email.value,
                     phone_number: registerForm.mobile.value,
-                    confirm_password: registerForm.confirmpassword.value
+                    confirm_password: registerForm.confirmpassword.value,
                 })
             }).then(response => {
                 if (response.ok) {
@@ -156,13 +157,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }).then(data => {
                 console.log(data);
+                alert('Successfully Registered');
                 window.location.href = '/';
             }).catch(error => {
                 console.log(error);
             });
-        }else {
+        } else {
             alert('Invalid Input');
         }
     });
-
 });

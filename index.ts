@@ -5,10 +5,8 @@ import path from 'path'
 import https from 'https'
 import fs from 'fs'
 import session from 'express-session'
-import helmet from 'helmet'
 import rate_limiter from 'express-rate-limit'
-import * as crypto from 'crypto';
-import csrf from 'csurf';
+import morgan from 'morgan'
 
 
 
@@ -25,19 +23,17 @@ const server_credentials = {
 
 const app = express()
 app.use(bodyParser.json())
+app.use(morgan('dev'));
 
 
 
-// BRING BACK LATER
 // Setup rate limiter to prevent brute force attacks
-// const apiLimiter = rate_limiter({
-//   windowMs: 1 * 60 * 1000, // 1 minute
-//   max: 3, // limit each IP to 3 requests per windowMs
-//   message: 'Too many requests from this IP, please try again later.'
-// });
+const apiLimiter = rate_limiter({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 3, // limit each IP to 3 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+});
 
-// Setup helmet to block XSS attacks
-app.use(helmet());
 
 
 app.use(cors());
@@ -48,11 +44,11 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const secret = crypto.randomBytes(32).toString('hex');
+
 
 try {
   app.use(session({
-    secret: secret,
+    secret: process.env.SESSION_SECRET || require('crypto').randomBytes(64).toString('hex'),
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -62,7 +58,7 @@ try {
     }
   }))
   
-  // app.use(csrf()); 
+}))
 }catch (e) {
   console.error('Error setting up session:', e);
   throw new Error('Failed to set up session');
@@ -78,7 +74,9 @@ app.use('/api/admin', require('./routers/adminRouter'));
 
 
 app.get('/', async (req: any, res: { render: (arg0: string) => void }) => {
-    
+
+    console.log('Session:', req.session.user);
+
     res.render('index');
 });
 
@@ -100,6 +98,10 @@ app.get('/admin/dashboard', (req: any, res) => {
 });
 
 
+app.get('/profile', (req: any, res: { render: (arg0: string) => void }) => {
+
+  res.render('upload');
+});
 const httpsServer = https.createServer(server_credentials,app);
 
 httpsServer.listen(443, () => {
