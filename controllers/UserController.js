@@ -26,17 +26,17 @@ exports.register = async (req, res) => {
         try {
             const client = await database_1.default.connect();
             const query = `
-              INSERT INTO users (id, first_name, last_name, email, password, phone_number, profile_picture)
+              INSERT INTO users (id, first_name, last_name, email, password, phone_number)
               VALUES ($1, $2, $3, $4, $5, $6)
             `;
             const values = [id, first_name, last_name, email, hashed_password, phone_number];
             await client.query(query, values);
             await client.release();
-            res.status(200).send('User registered successfully.');
+            res.status(200).json({ message: 'User registered successfully' });
         }
         catch (error) {
             console.error('Error executing query:', error);
-            res.status(500).send('Internal Server Error');
+            res.status(500).json({ message: 'An error occurred' });
         }
     }
     catch (err) {
@@ -92,9 +92,12 @@ exports.login = (req, res) => {
         }
     });
 };
+// UserController.js
 exports.uploadImage = (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded.');
     }
-    return res.status(200).send('File uploaded successfully.');
+    const filePath = req.file.path;
+    // Respond with a success message or further processing
+    res.status(200).send('File uploaded successfully.');
 };

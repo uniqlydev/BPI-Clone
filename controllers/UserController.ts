@@ -9,7 +9,9 @@ import RegisterRequest from '../interfaces/RegisterRequest';
 
 
 
-exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
+exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) => {
+    json(arg0: { message: string; }): unknown; (): any; new(): any; send: { (arg0: string): any; new(): any; }; 
+}; }) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -35,17 +37,17 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
         try {
             const client = await pool.connect();
             const query = `
-              INSERT INTO users (id, first_name, last_name, email, password, phone_number, profile_picture)
+              INSERT INTO users (id, first_name, last_name, email, password, phone_number)
               VALUES ($1, $2, $3, $4, $5, $6)
             `;
             const values = [id, first_name, last_name, email, hashed_password, phone_number];
             await client.query(query, values);
             await client.release();
         
-            res.status(200).send('User registered successfully.');
+            res.status(200).json({ message: 'User registered successfully' });
           } catch (error) {
             console.error('Error executing query:', error);
-            res.status(500).send('Internal Server Error');
+            res.status(500).json({ message: 'An error occurred' });
         }
     }catch(err){
         console.error('Error executing query', err); // Log the error for debugging

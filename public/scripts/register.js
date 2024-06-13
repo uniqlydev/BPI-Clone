@@ -25,7 +25,6 @@ const validateInputs = async () => {
     const confirmPassword = document.getElementById('confirmpassword');
     const mobile = document.getElementById('mobile');
     const email = document.getElementById('email');
-    const profile_picture = document.getElementById('profile_picture');
     
     const valid_first_name = first_name.value.trim();
     const valid_last_name = last_name.value.trim();
@@ -33,7 +32,6 @@ const validateInputs = async () => {
     const valid_confirmPassword = confirmPassword.value.trim();
     const valid_mobile_number = mobile.value.trim();
     const valid_email = email.value.trim();
-    const valid_profile_picture = profile_picture.files[0];
 
     let isValid = true;
 
@@ -63,23 +61,12 @@ const validateInputs = async () => {
     if (valid_password === '') {
         setError(password, 'Password cannot be blank');
         isValid = false;
-    } else if (!isValidPassword(valid_password)) {
-        setError(password, "Password should contain at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character, and must be 12-16 characters long");
-        isValid = false;
-    } else {
-        setSuccess(password);
     }
-
     // Confirm Password Validation
     if (valid_confirmPassword === '') {
         setError(confirmPassword, 'Passwords do not match');
         isValid = false;
-    } else if (valid_password !== valid_confirmPassword) {
-        setError(confirmPassword, 'Passwords do not match');
-        isValid = false;
-    } else {
-        setSuccess(confirmPassword);
-    }
+    } 
 
     // Mobile Number Validation
     if (valid_mobile_number === '') {
@@ -103,17 +90,6 @@ const validateInputs = async () => {
         setSuccess(email);
     }
 
-    // Profile Picture Validation
-    if (!valid_profile_picture) {
-        setError(profile_picture, 'Profile picture cannot be blank');
-        isValid = false;
-    } else if (!(await isValidProfilePicture(valid_profile_picture))) {
-        setError(profile_picture, 'Provide a valid PNG or JPEG image');
-        isValid = false;
-    } else {
-        setSuccess(profile_picture);
-    }
-
     return isValid;
 };
 
@@ -129,8 +105,7 @@ const isValidLastName = last_name => {
 
 const isValidPassword = password => {
     const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*_])[A-Za-z\d@$!%*_]{12,16}$/;
-    return re.test(String(password));
-    return true;
+    return re.test(password);
 };
 
 const isValidMobileNumber = mobile => {
