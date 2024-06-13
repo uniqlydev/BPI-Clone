@@ -128,8 +128,8 @@ const isValidLastName = last_name => {
 };
 
 const isValidPassword = password => {
-    // const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*_])[A-Za-z\d@$!%*_]{12,16}$/;
-    // return re.test(String(password));
+    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*_])[A-Za-z\d@$!%*_]{12,16}$/;
+    return re.test(String(password));
     return true;
 };
 
@@ -143,66 +143,14 @@ const isValidEmail = email => {
     return re.test(String(email));
 };
 
-const isValidProfilePicture = file => {
-    const validTypes = ['image/jpeg', 'image/png'];
-    const validType = validTypes.includes(file.type);
-
-    if (!validType) {
-        return false;
-    }
-
-    // Check the file header (magic numbers)
-    const fileHeaderValid = new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = function(e) {
-            const arr = (new Uint8Array(e.target.result)).subarray(0, 4);
-            let header = "";
-            for (let i = 0; i < arr.length; i++) {
-                header += arr[i].toString(16);
-            }
-
-            let isValid = false;
-            switch (header) {
-                case "89504e47": // PNG
-                    isValid = true;
-                    break;
-                case "ffd8ffe0":
-                case "ffd8ffe1":
-                case "ffd8ffe2": // JPEG
-                    isValid = true;
-                    break;
-                default:
-                    isValid = false; // other file types
-                    break;
-            }
-
-            resolve(isValid);
-        };
-
-        reader.onerror = function() {
-            reject(false);
-        };
-
-        reader.readAsArrayBuffer(file);
-    });
-
-    return fileHeaderValid;
-};
-
 document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
     const submitbtn = document.getElementById('submit');
-    const fileInput = document.getElementById('profile_picture');
-
-
 
     submitbtn.addEventListener('click', async (e) => {
         e.preventDefault();
 
         if (await validateInputs()) {
-
-            console.log(registerForm.profile_picture.files[0]);
-
             fetch('/api/users/register', {
                 method: 'POST',
                 headers: {
@@ -215,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     email: registerForm.email.value,
                     phone_number: registerForm.mobile.value,
                     confirm_password: registerForm.confirmpassword.value,
-                    profile_picture: fileInput.files[0]
                 })
             }).then(response => {
                 if (response.ok) {

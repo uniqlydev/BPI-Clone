@@ -109,10 +109,17 @@ exports.login = (req: any, res: any) => {
 
 };
 
-exports.uploadImage = (req: any, res: any) => {
+// UserController.js
+
+exports.uploadImage = (req: { file: { path: any; }; }, res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): void; new(): any; }; }; }) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded.');
     }
-    return res.status(200).send('File uploaded successfully.');
-}
+
+    const filePath = req.file.path; 
+
+    // Respond with a success message or further processing
+    res.status(200).send('File uploaded successfully.');
+};
+
 

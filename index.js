@@ -36,7 +36,6 @@ app.use(express_1.default.json());
 app.set('view engine', 'ejs');
 app.set('views', path_1.default.join(__dirname, 'views'));
 app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
-app.use('/uploads', express_1.default.static('uploads'));
 const secret = process.env.SESSION_SECRET;
 const secret_uninitialized = require('crypto').randomBytes(64).toString('hex');
 console.log('Secret:', secret_uninitialized);
