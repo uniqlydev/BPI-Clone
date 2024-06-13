@@ -56,3 +56,11 @@ button:hover {
     background-color: #d44d4e;
 }
 
+
+.error, .input-control {
+    color: red;
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 14px;
+    width: 100%;
+}

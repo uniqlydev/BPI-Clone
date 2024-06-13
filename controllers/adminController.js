@@ -18,51 +18,30 @@ exports.login = (req, res) => {
     const query = "SELECT * FROM Users WHERE email = $1 AND role = 'superuser'";
     database_1.default.query(query, [req.body.email], async (err, result) => {
         if (err) {
-            console.error('Error executing query', err); // Log the error for debugging
-            return res.status(400).send(err); // Send the error in the response
+            console.error('Error executing query', err);
+            return res.status(400).send(err);
         }
         if (result && result.rows && result.rows.length > 0) {
             const user = result.rows[0];
             const hasher = new HashUtility_1.default();
             const isValid = await hasher.comparePassword(req.body.password, user.password);
             if (isValid) {
-                return res.status(200).send('Login successful');
+                req.session.authenticated = true;
+                req.session.user = user;
+                req.session.save((err) => {
+                    if (err) {
+                        return res.status(500).send('Internal Server Error');
+                    }
+                    res.status(201).json({ message: 'Login successful' });
+                });
             }
             else {
                 return res.status(400).send('Invalid credentials');
             }
         }
         else {
-            console.error('No rows returned'); // Log the issue for debugging
+            // User is not an admin account
             return res.status(400).send('User not found.');
         }
     });
 };
-// exports.login = (req: any, res: any) => {
-//     const hash = new HashUtility();
-//     // Clean up the input
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//         return res.status(400).send("Invalid input");
-//     }
-//     if (Validator.isEmail(req.body.email) === false) 
-//         return res.status(400).send("Invalid email address");
-//     const query = "SELECT * FROM Users WHERE email = $1 AND role = 'superuser'";
-//     pool.query(query, [req.body.email], async (err: string, result: { rows: any; }) => {
-//         if (err) {
-//             console.error('Error executing query', err);
-//             return res.status(400).send(err);
-//         }
-//         if (result && result.rows && result.rows.length > 0) {
-//             if (await hash.comparePassword(req.body.password, result.rows[0].password) === true) {
-//                 req.session.user = result.rows[0];
-//                 return res.status(200).send('Login successful');
-//             } else {
-//                 return res.status(400).send('Invalid credentials');
-//             }
-//         } else {
-//             console.error('No rows returned');
-//             return res.status(400).send('User not found');
-//         }
-//     });
-// };

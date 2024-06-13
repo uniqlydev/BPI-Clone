@@ -34,7 +34,6 @@ const https_1 = __importDefault(require("https"));
 const fs_1 = __importDefault(require("fs"));
 const express_session_1 = __importDefault(require("express-session"));
 const helmet_1 = __importDefault(require("helmet"));
-const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const crypto = __importStar(require("crypto"));
 // Loading SSL cert and key from dotenv
 const private_key = fs_1.default.readFileSync(path_1.default.resolve(__dirname, 'server.key'), 'utf-8');
@@ -46,12 +45,13 @@ const server_credentials = {
 };
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.json());
+// BRING BACK LATER
 // Setup rate limiter to prevent brute force attacks
-const apiLimiter = (0, express_rate_limit_1.default)({
-    windowMs: 1 * 60 * 1000, // 1 minute
-    max: 3, // limit each IP to 3 requests per windowMs
-    message: 'Too many requests from this IP, please try again later.'
-});
+// const apiLimiter = rate_limiter({
+//   windowMs: 1 * 60 * 1000, // 1 minute
+//   max: 3, // limit each IP to 3 requests per windowMs
+//   message: 'Too many requests from this IP, please try again later.'
+// });
 // Setup helmet to block XSS attacks
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)());
@@ -78,7 +78,7 @@ catch (e) {
     console.error('Error setting up session:', e);
     throw new Error('Failed to set up session');
 }
-app.use('/api', apiLimiter);
+// app.use('/api', apiLimiter);
 // Routes
 app.use('/api/users', require('./routers/userRouter'));
 app.use('/api/admin', require('./routers/adminRouter'));
@@ -90,6 +90,13 @@ app.get('/register', (req, res) => {
 });
 app.get('/admin', (req, res) => {
     res.render('admin_login');
+});
+app.get('/admin/dashboard', (req, res) => {
+    console.log('Session user:', req.session.user); // Log session user
+    if (!req.session.user) {
+        return res.redirect('/admin');
+    }
+    res.render('admin_dashboard');
 });
 const httpsServer = https_1.default.createServer(server_credentials, app);
 httpsServer.listen(443, () => {

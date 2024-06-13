@@ -74,14 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         if (validateInputs() == true) {
-            // Generate a CSRF token and include it in the request header
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
             fetch('/api/users/login', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-Token': csrfToken
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     email: username.value,

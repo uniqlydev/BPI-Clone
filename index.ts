@@ -26,12 +26,15 @@ const server_credentials = {
 const app = express()
 app.use(bodyParser.json())
 
+
+
+// BRING BACK LATER
 // Setup rate limiter to prevent brute force attacks
-const apiLimiter = rate_limiter({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 3, // limit each IP to 3 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
-});
+// const apiLimiter = rate_limiter({
+//   windowMs: 1 * 60 * 1000, // 1 minute
+//   max: 3, // limit each IP to 3 requests per windowMs
+//   message: 'Too many requests from this IP, please try again later.'
+// });
 
 // Setup helmet to block XSS attacks
 app.use(helmet());
@@ -67,7 +70,7 @@ try {
 
 
 
-app.use('/api', apiLimiter);
+// app.use('/api', apiLimiter);
 
 // Routes
 app.use('/api/users', require('./routers/userRouter'));
@@ -83,9 +86,19 @@ app.get('/register', (req: any, res: { render: (arg0: string) => void }) => {
     res.render('register');
 });
 
+
 app.get('/admin', (req: any, res: { render: (arg0: string) => void }) => {
-    res.render('admin_login');
+  res.render('admin_login');
 });
+
+app.get('/admin/dashboard', (req: any, res) => {
+  console.log('Session user:', req.session.user); // Log session user
+  if (!req.session.user) {
+      return res.redirect('/admin');
+  }
+  res.render('admin_dashboard');
+});
+
 
 const httpsServer = https.createServer(server_credentials,app);
 
