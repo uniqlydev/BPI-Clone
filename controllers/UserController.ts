@@ -31,24 +31,22 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
 
         const id = idGen.generateID();
 
-        const profile_picture = req.file ? req.file.path : null;
 
-    
-        const query = "INSERT INTO Users(id, first_name, last_name, email, password, phone_number, profile_picture) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *";
-        const user = new User(id, first_name!, last_name!, email!, hashed_password!, phone_number!, profile_picture!);
-    
-        pool.query(query, [user.getID(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword(), user.getPhone()], (err: string, result: { rows: string | any[]; }) => {
-            if (err) {
-                console.error('Error executing query', err); // Log the error for debugging
-                return res.status(400).send(err); // Send the error in the response
-            }
-            if (result && result.rows && result.rows.length > 0) {
-                return res.status(201).send(`User added with ID: ${result.rows[0].password}`);
-            } else {
-                console.error('No rows returned'); // Log the issue for debugging
-                return res.status(400).send('User could not be added.');
-            }
-        });
+        try {
+            const client = await pool.connect();
+            const query = `
+              INSERT INTO users (id, first_name, last_name, email, password, phone_number, profile_picture)
+              VALUES ($1, $2, $3, $4, $5, $6)
+            `;
+            const values = [id, first_name, last_name, email, hashed_password, phone_number];
+            await client.query(query, values);
+            await client.release();
+        
+            res.status(200).send('User registered successfully.');
+          } catch (error) {
+            console.error('Error executing query:', error);
+            res.status(500).send('Internal Server Error');
+        }
     }catch(err){
         console.error('Error executing query', err); // Log the error for debugging
         return res.status
@@ -110,4 +108,11 @@ exports.login = (req: any, res: any) => {
     });
 
 };
+
+exports.uploadImage = (req: any, res: any) => {
+    if (!req.file) {
+        return res.status(400).send('No file uploaded.');
+    }
+    return res.status(200).send('File uploaded successfully.');
+}
 

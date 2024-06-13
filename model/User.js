@@ -8,6 +8,7 @@ class User {
         this.email = email;
         this.password = password;
         this.phone = phone;
+        this.profile_picture = profile_picture;
         this.role = "user";
     }
     getID() {
@@ -30,6 +31,9 @@ class User {
     }
     getRole() {
         return this.role;
+    }
+    getProfilePicture() {
+        return this.profile_picture;
     }
 }
 exports.default = User;

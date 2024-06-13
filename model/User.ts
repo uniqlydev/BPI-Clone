@@ -6,6 +6,7 @@ class User {
     private email: String;
     private password: String;
     private phone: String;
+    private profile_picture: String;
     private role: string;
 
     constructor(id: String,first_name: String,last_name: String,email: String,password: String,phone: String, profile_picture: String) {
@@ -15,6 +16,7 @@ class User {
         this.email = email;
         this.password = password;
         this.phone = phone;
+        this.profile_picture = profile_picture;
         this.role = "user"
     }
 
@@ -44,6 +46,10 @@ class User {
 
     public getRole(): String {
         return this.role;
+    }
+
+    public getProfilePicture(): String {
+        return this.profile_picture;
     }
 }
 

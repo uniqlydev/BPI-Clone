@@ -10,8 +10,6 @@ interface RegisterRequest extends Request {
         confirm_password: string;
         phone_number: string;
     };
-
-    file?: Express.Multer.File;
 }
 
 export default RegisterRequest;

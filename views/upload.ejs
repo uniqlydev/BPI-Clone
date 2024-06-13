@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload profile pic!</title>
+    <script>
+            const profile_pic = document.getElementById('profile_picture');
+    const submit = document.getElementById('submit');
+
+    // Check if they all exists
+    if (profile_pic && submit) {
+        console.log('All elements exist');
+    }else {
+        console.log('Some elements do not exist');
+    }
+    </script>
+</head>
+<body>
+
+    <form method="post" action="">
+        <input type="file" name="profile_pic" id="profile_pic">
+        <button type="button" id="submit">Upload</button>
+    </form>
+    
+</body>
+</html>

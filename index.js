@@ -36,6 +36,7 @@ app.use(express_1.default.json());
 app.set('view engine', 'ejs');
 app.set('views', path_1.default.join(__dirname, 'views'));
 app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
+app.use('/uploads', express_1.default.static('uploads'));
 const secret = process.env.SESSION_SECRET;
 const secret_uninitialized = require('crypto').randomBytes(64).toString('hex');
 console.log('Secret:', secret_uninitialized);
@@ -55,7 +56,7 @@ catch (e) {
     console.error('Error setting up session:', e);
     throw new Error('Failed to set up session');
 }
-app.use('/api', apiLimiter);
+// app.use('/api', apiLimiter);
 // Routes
 app.use('/api/users', require('./routers/userRouter'));
 app.get('/', async (req, res) => {
@@ -63,6 +64,9 @@ app.get('/', async (req, res) => {
 });
 app.get('/register', (req, res) => {
     res.render('register');
+});
+app.get('/profile', (req, res) => {
+    res.render('upload');
 });
 const httpsServer = https_1.default.createServer(server_credentials, app);
 httpsServer.listen(443, () => {
