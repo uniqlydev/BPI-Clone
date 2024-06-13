@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class User {
-    constructor(id, first_name, last_name, email, password, phone) {
+    constructor(id, first_name, last_name, email, password, phone, profile_picture) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;

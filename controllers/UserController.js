@@ -9,13 +9,6 @@ const IDGenerator_1 = __importDefault(require("../utils/IDGenerator"));
 const HashUtility_1 = __importDefault(require("../utils/HashUtility"));
 const Validator_1 = __importDefault(require("../utils/Validator"));
 const express_validator_1 = require("express-validator");
-const validate_sanitize = [
-    (0, express_validator_1.body)('email').isEmail().withMessage("Invalid email address").normalizeEmail(),
-    (0, express_validator_1.body)('password').isStrongPassword(),
-    (0, express_validator_1.body)('phone_number').isMobilePhone('en-PH').withMessage("Number is not a valid phone number").trim().escape(),
-    (0, express_validator_1.body)('first_name').isString().trim().escape(),
-    (0, express_validator_1.body)('last_name').isString().trim().escape()
-];
 exports.register = async (req, res) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
@@ -31,8 +24,9 @@ exports.register = async (req, res) => {
     try {
         const hashed_password = await hasher.hashPassword(password);
         const id = idGen.generateID();
-        const query = "INSERT INTO Users(id, first_name, last_name, email, password, phone_number) VALUES($1, $2, $3, $4, $5, $6) RETURNING *";
-        const user = new User_1.default(id, first_name, last_name, email, hashed_password, phone_number);
+        const profile_picture = req.file ? req.file.path : null;
+        const query = "INSERT INTO Users(id, first_name, last_name, email, password, phone_number, profile_picture) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *";
+        const user = new User_1.default(id, first_name, last_name, email, hashed_password, phone_number, profile_picture);
         database_1.default.query(query, [user.getID(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword(), user.getPhone()], (err, result) => {
             if (err) {
                 console.error('Error executing query', err); // Log the error for debugging

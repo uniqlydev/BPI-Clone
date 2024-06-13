@@ -8,7 +8,7 @@ class User {
     private phone: String;
     private role: string;
 
-    constructor(id: String,first_name: String,last_name: String,email: String,password: String,phone: String) {
+    constructor(id: String,first_name: String,last_name: String,email: String,password: String,phone: String, profile_picture: String) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;

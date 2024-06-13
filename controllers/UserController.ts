@@ -4,20 +4,12 @@ import IDGenerator from '../utils/IDGenerator';
 import Hash from '../utils/HashUtility';
 import Validator from '../utils/Validator';
 import { body, validationResult } from 'express-validator';
+import multer from 'multer';
+import RegisterRequest from '../interfaces/RegisterRequest';
 
 
 
-
-const validate_sanitize = [
-    body('email').isEmail().withMessage("Invalid email address").normalizeEmail(),
-    body('password').isStrongPassword(),
-    body('phone_number').isMobilePhone('en-PH').withMessage("Number is not a valid phone number").trim().escape(),
-    body('first_name').isString().trim().escape(),
-    body('last_name').isString().trim().escape()
-];
-
-
-exports.register =  async (req: { body: { password: string; first_name?: string; last_name?: string; email?: string; phone_number?: string; confirm_password?: string }; }, res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
+exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -26,20 +18,24 @@ exports.register =  async (req: { body: { password: string; first_name?: string;
 
     const hasher = new Hash();
     const idGen = new IDGenerator();
-    const { first_name, last_name, email, password, phone_number, confirm_password } = req.body as { password: string; first_name?: string; last_name?: string; email?: string; phone_number?: string; confirm_password?: string};
+    const { first_name, last_name, email, password, phone_number, confirm_password } = req.body;
 
     // Check if the password and confirm password match
     if (password !== confirm_password) {
         return res.status(400).send('Passwords do not match.');
     }
 
+
     try {
         const hashed_password = await hasher.hashPassword(password);
 
         const id = idGen.generateID();
+
+        const profile_picture = req.file ? req.file.path : null;
+
     
-        const query = "INSERT INTO Users(id, first_name, last_name, email, password, phone_number) VALUES($1, $2, $3, $4, $5, $6) RETURNING *";
-        const user = new User(id, first_name!, last_name!, email!, hashed_password!, phone_number!);
+        const query = "INSERT INTO Users(id, first_name, last_name, email, password, phone_number, profile_picture) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *";
+        const user = new User(id, first_name!, last_name!, email!, hashed_password!, phone_number!, profile_picture!);
     
         pool.query(query, [user.getID(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword(), user.getPhone()], (err: string, result: { rows: string | any[]; }) => {
             if (err) {
