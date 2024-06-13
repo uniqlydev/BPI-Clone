@@ -61,12 +61,22 @@ const validateInputs = async () => {
     if (valid_password === '') {
         setError(password, 'Password cannot be blank');
         isValid = false;
+    }else if (!isValidPassword(valid_password)) {
+        setError(password, 'Provide a valid password');
+        isValid = false;
+    }else {
+        setSuccess(password);
     }
+
+
     // Confirm Password Validation
     if (valid_confirmPassword === '') {
         setError(confirmPassword, 'Passwords do not match');
         isValid = false;
-    } 
+    }else if (valid_password !== valid_confirmPassword) {
+        setError(confirmPassword, 'Passwords do not match');
+        isValid = false;
+    }
 
     // Mobile Number Validation
     if (valid_mobile_number === '') {
@@ -104,7 +114,7 @@ const isValidLastName = last_name => {
 };
 
 const isValidPassword = password => {
-    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*_])[A-Za-z\d@$!%*_]{12,16}$/;
+    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*_])[A-Za-z\d@$!%*_]{8,16}$/;
     return re.test(password);
 };
 

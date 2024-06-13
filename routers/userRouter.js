@@ -24,7 +24,6 @@ const imageUpload = (0, multer_1.default)({
 });
 // Authorization 
 router.post('/register', UserController.register);
-router.get('/getUsers', UserController.getUser);
-router.get('/login', UserController.login);
+router.post('/login', UserController.login);
 router.post('/img', imageUpload.single('image'), UserController.uploadImage);
 module.exports = router;
