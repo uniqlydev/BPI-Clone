@@ -47,6 +47,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 try {
+  // User 
   app.use(session({
     secret: process.env.SESSION_SECRET || require('crypto').randomBytes(64).toString('hex'),
     resave: false,
@@ -57,8 +58,20 @@ try {
       maxAge: 3600000 // last for only 1 hour
     }
   }))
-  
-}))
+
+  // Admin
+  app.use(session
+    ({
+      secret: process.env.SESSION_SECRET_ADMIN || require('crypto').randomBytes(64).toString('hex'),
+      resave: false,
+      saveUninitialized: true,
+      cookie: {
+        secure: true,
+        httpOnly: true,
+        maxAge: 3600000 // last for only 1 hour
+      }
+    }))
+
 }catch (e) {
   console.error('Error setting up session:', e);
   throw new Error('Failed to set up session');
@@ -75,31 +88,36 @@ app.use('/api/admin', require('./routers/adminRouter'));
 
 app.get('/', async (req: any, res: { render: (arg0: string) => void }) => {
 
-    console.log('Session:', req.session.user);
+    console.log('Session:', req.session);
 
     res.render('index');
 });
 
 app.get('/register', (req: any, res: { render: (arg0: string) => void }) => {
+    console.log('Session:', req.session);
     res.render('register');
 });
 
 
 app.get('/admin', (req: any, res: { render: (arg0: string) => void }) => {
+  const adminSession = req.session;
+
+  console.log('Admin session:', adminSession);
+
   res.render('admin_login');
 });
 
 app.get('/admin/dashboard', (req: any, res) => {
-  console.log('Session user:', req.session.user); // Log session user
-  if (!req.session.user) {
-      return res.redirect('/admin');
-  }
+  const adminSession = req.session;
+
+  console.log('Admin session:', adminSession);
+  
   res.render('admin_dashboard');
 });
 
 
 app.get('/profile', (req: any, res: { render: (arg0: string) => void }) => {
-
+  console.log('Session:', req.session);
   res.render('upload');
 });
 const httpsServer = https.createServer(server_credentials,app);

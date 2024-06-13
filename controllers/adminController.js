@@ -26,8 +26,8 @@ exports.login = (req, res) => {
             const hasher = new HashUtility_1.default();
             const isValid = await hasher.comparePassword(req.body.password, user.password);
             if (isValid) {
-                req.session.authenticated = true;
-                req.session.user = user;
+                req.session.admin_authenticated = true;
+                req.session.admin = user;
                 req.session.save((err) => {
                     if (err) {
                         return res.status(500).send('Internal Server Error');

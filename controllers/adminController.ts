@@ -1,10 +1,8 @@
 import { body, validationResult } from 'express-validator';
 import Validator from '../utils/Validator';
 import pool from '../model/database';
-import HashUtility from '../utils/HashUtility';
-import User from '../model/User';
-import IDGenerator from '../utils/IDGenerator';
 import Hash from '../utils/HashUtility';
+
 
 
 
@@ -31,8 +29,8 @@ exports.login = (req: any, res: any) => {
             const hasher = new Hash();
             const isValid = await hasher.comparePassword(req.body.password, user.password);
             if (isValid) {
-                req.session.authenticated = true;
-                req.session.user = user;
+                req.session.admin_authenticated = true;
+                req.session.admin = user;
                 req.session.save((err: any) => {
                     if (err) {
                         

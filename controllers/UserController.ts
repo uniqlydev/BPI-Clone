@@ -5,8 +5,8 @@ import Hash from '../utils/HashUtility';
 import Validator from '../utils/Validator';
 import { body, validationResult } from 'express-validator';
 import multer from 'multer';
-import RegisterRequest from '../interfaces/RegisterRequest';
-import LoginRequest from '../interfaces/LoginRequest';
+import RegisterRequest from '../Interfaces/RegisterRequest';
+import LoginRequest from '../Interfaces/LoginRequest';
 import { Request, Response } from 'express';
 
 
