@@ -76,7 +76,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
         return res.status(400).send("Invalid email address");
 
     // Retrieve the user with the email and password 
-    const user = "SELECT password FROM Users WHERE email = $1 LIMIT 1;"
+    const user = "SELECT password FROM Users WHERE email = $1 AND role = 'user' LIMIT 1;"
     const values = [req.body.email];
 
     pool.query(user, values, async (err: string, result: { rows: any; }) => {
@@ -89,6 +89,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
             const hasher = new Hash();
             const isMatch = await hasher.comparePassword(req.body.password, hashedPassword);
             if (isMatch) {
+                // Refresh the session
                 req.session.user = {
                     email: req.body.email,
                     authenticated: true
@@ -102,8 +103,6 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
             return res.status(400).json({ message: 'Invalid email or password' });
         }
     });
-
-
 
 
 };
@@ -155,5 +154,13 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
         res.status(500).json({ message: 'An error occurred' });
     }
 };
-  
+
+exports.logout = (req: Request, res: Response) => {
+    req.session.destroy((err: any) => {
+        if (err) {
+            return res.status(500).send('Internal Server Error');
+        }
+        res.status(200).send('Logged out successfully');
+    });
+}
 

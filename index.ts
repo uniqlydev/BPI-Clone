@@ -49,7 +49,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 try {
   // User 
   app.use(session({
-    secret: process.env.SESSION_SECRET || require('crypto').randomBytes(64).toString('hex'),
+    secret: process.env.SESSION_SECRET || require('crypto').randomBytes(16).toString('hex'),
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -62,7 +62,7 @@ try {
   // Admin
   app.use(session
     ({
-      secret: process.env.SESSION_SECRET_ADMIN || require('crypto').randomBytes(64).toString('hex'),
+      secret: process.env.SESSION_SECRET_ADMIN || require('crypto').randomBytes(16).toString('hex'),
       resave: false,
       saveUninitialized: true,
       cookie: {
@@ -111,6 +111,18 @@ app.get('/admin/dashboard', (req: any, res) => {
   const adminSession = req.session;
 
   console.log('Admin session:', adminSession);
+
+  if (req.session.user !== undefined) {
+    return res.status(403).send('Unauthorized');
+  }
+
+  if (req.session.admin_authenticated !== true) {
+    return res.status(403).send('Unauthorized');
+  }
+
+  if (req.session.admin === undefined) {
+    return res.status(403).send('Unauthorized');
+  }
   
   res.render('admin_dashboard');
 });
