@@ -11,8 +11,8 @@ import morgan from 'morgan'
 
 
 // Loading SSL cert and key from dotenv
-const private_key = fs.readFileSync(path.resolve(__dirname, 'server.key'),'utf-8');
-const certificate = fs.readFileSync(path.resolve(__dirname, 'server.cert'), 'utf8');
+const private_key = fs.readFileSync(path.resolve(__dirname, '../server.key'),'utf-8');
+const certificate = fs.readFileSync(path.resolve(__dirname, '../server.cert'), 'utf8');
 
 
 // Set up SSL
@@ -41,8 +41,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, '../views'));
+app.use(express.static(path.join(__dirname, '../public')));
 
 
 

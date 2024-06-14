@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx nodemon index.js",
     "build": "tsc",
-    "dev": "concurrently \"nodemon --exec ts-node index.js\" \"node redirect.js\""
+    "dev": "concurrently \"nodemon --exec ts-node ./dist/index.js\" \"node ./dist/redirect.js\""
   },
   "keywords": [],
   "author": "",

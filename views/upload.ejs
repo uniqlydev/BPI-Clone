@@ -4,14 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload profile pic!</title>
+    <link rel="stylesheet" href="styles/colors.css">
+    <link rel="stylesheet" href="styles/fonts.css">
+    <link rel="stylesheet" href="styles/upload.css">
     <script src="scripts/upload.js"></script>
 </head>
 <body>
-
-    <form method="post" action="">
-        <input type="file" name="profile_pic" id="profile_pic">
-        <button type="button" id="submit">Upload</button>
-    </form>
+    <div class="splitscreen">
+        <div class="left">
+            <h1>Upload your profile picture here: </h1>
+            <form method="post" action="">
+                <input type="file" name="profile_pic" id="profile_pic">
+                <button type="button" id="submit">Upload</button>
+            </form>
+        </div>
+        <div class="right">
+            <div class="middle">
+                <h1>Status</h1>
+                <p id="status">No file uploaded</p>
+            </div>
+        </div>
+    </div>
     
 </body>
 </html>

@@ -111,11 +111,11 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
 exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: Response) => {
     // Check if user is authenticated
     if (!req.session.user || !req.session.user.authenticated) {
-        return res.status(401).send('Unauthorized');
+        return res.status(401).json({message: "Unauthorized"});
     }
 
     if (!req.file || !req.file.buffer) {
-        return res.status(400).send('No file uploaded.');
+        return res.status(400).json({message: "No file uploaded"});
     }
 
     const buffer = req.file.buffer;
@@ -152,7 +152,7 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
         res.status(200).json({ message: 'Profile picture updated successfully', fileType });
     } catch (error) {
         console.error('Error updating profile picture:', error);
-        res.status(500).send('Internal server error');
+        res.status(500).json({ message: 'An error occurred' });
     }
 };
   

@@ -4,8 +4,6 @@ import pool from '../model/database';
 import Hash from '../utils/HashUtility';
 
 
-
-
 exports.login = (req: any, res: any) => {
     // Sanitize
     const errors = validationResult(req);

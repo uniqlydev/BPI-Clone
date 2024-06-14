@@ -1,0 +1,86 @@
+body {
+    background-color: var(--bpi-red);
+    font-family: var(--font-body);
+
+    /* Center all  */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.splitscreen {
+    background-color: var(--background-main);
+    color: var(--bpi-red);
+
+    width: 1300px;
+    height: 1000px;
+    border-radius: 30px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+
+    /* Center all elements */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.splitscreen .left {
+    /* Put to left half of the splitscreen */
+    background-color: var(--bpi-red);
+    height: 100%;
+    width: 100%;
+    color: white;
+
+    /* Put to the left */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* stack everything  */
+    flex-direction: column;
+    gap: 20px;
+
+}
+
+.splitscreen .right {
+    /* Put to right half of the splitscreen */
+    background-color: var(--background-main);
+    height: 100%;
+    width: 100%;
+
+    /* Put to the right */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.splitscreen form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+}
+
+.splitscreen form input {
+    padding: 18px;
+    background-color: var(--inputbox);
+    color: black;
+    border-radius: 5px;
+    border: none;
+    width: 90%;
+}
+
+.splitscreen form button {
+    padding: 15px;
+    background-color: greenyellow;
+    color: black;
+    font-size: large;
+    font-family: var(--font-body);
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+
+
