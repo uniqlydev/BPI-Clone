@@ -5,7 +5,9 @@ const UserController = require('../controllers/UserController')
 
 import multer from 'multer';
 
+const storage = multer.memoryStorage();
 const imageUpload = multer({
+    storage: storage,
     dest: 'images',
     fileFilter: (req, file, cb) => {
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
@@ -23,6 +25,6 @@ const imageUpload = multer({
 // Authorization 
 router.post('/register', UserController.register);
 router.post('/login', UserController.login)
-router.post('/img', imageUpload.single('image'), UserController.uploadImage);
+router.post('/img', imageUpload.single('image'), UserController.uploadImage)
 
 module.exports = router
