@@ -7,7 +7,9 @@ const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 const UserController = require('../controllers/UserController');
 const multer_1 = __importDefault(require("multer"));
+const storage = multer_1.default.memoryStorage();
 const imageUpload = (0, multer_1.default)({
+    storage: storage,
     dest: 'images',
     fileFilter: (req, file, cb) => {
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];

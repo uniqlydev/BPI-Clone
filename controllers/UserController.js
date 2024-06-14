@@ -85,23 +85,47 @@ exports.login = (req, res) => {
         }
     });
 };
-exports.uploadImage = (req, res) => {
-    if (!req.file) {
+exports.uploadImage = async (req, res) => {
+    // Check if user is authenticated
+    if (!req.session.user || !req.session.user.authenticated) {
+        return res.status(401).send('Unauthorized');
+    }
+    if (!req.file || !req.file.buffer) {
         return res.status(400).send('No file uploaded.');
     }
-    const filePath = req.file.path;
-    const query = "UPDATE Users SET profile_image = $1 WHERE email = $2;";
-    if (req.session && req.session.user) {
-        const values = [filePath, req.session.user.email];
-        database_1.default.query(query, values, (err) => {
-            if (err) {
-                console.error('Error executing query', err); // Log the error for debugging
-                return res.status(400).send(err); // Send the error in the response
-            }
-            res.status(200).json({ message: 'File uploaded and user profile updated successfully' });
-        });
+    const buffer = req.file.buffer;
+    // Validate file type based on magic numbers
+    const pngMagicNumbers = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    const jpgMagicNumbers = Buffer.from([0xFF, 0xD8, 0xFF]);
+    const jpegMagicNumbers1 = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]);
+    const jpegMagicNumbers2 = Buffer.from([0xFF, 0xD8, 0xFF, 0xE1]);
+    let fileType = '';
+    if (buffer.slice(0, pngMagicNumbers.length).equals(pngMagicNumbers)) {
+        fileType = 'PNG';
+    }
+    else if (buffer.slice(0, jpgMagicNumbers.length).equals(jpgMagicNumbers)) {
+        fileType = 'JPG';
+    }
+    else if (buffer.slice(0, jpegMagicNumbers1.length).equals(jpegMagicNumbers1) && buffer.slice(6, 10).toString() === 'JFIF') {
+        fileType = 'JPEG';
+    }
+    else if (buffer.slice(0, jpegMagicNumbers2.length).equals(jpegMagicNumbers2) && buffer.slice(6, 10).toString() === 'Exif') {
+        fileType = 'JPEG';
     }
     else {
-        res.status(400).json({ message: 'User not authenticated' });
+        return res.status(400).send('Unsupported file type.');
+    }
+    // Prepare query to update user's profile picture
+    const query = 'UPDATE Users SET profile_picture = $1 WHERE email = $2';
+    const values = [buffer, req.session.user.email];
+    try {
+        // Execute the query
+        const result = await database_1.default.query(query, values);
+        console.log('Profile picture updated successfully:', result.rowCount);
+        res.status(200).json({ message: 'Profile picture updated successfully', fileType });
+    }
+    catch (error) {
+        console.error('Error updating profile picture:', error);
+        res.status(500).send('Internal server error');
     }
 };
