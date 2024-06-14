@@ -1,5 +1,7 @@
 import express from 'express'
 import path from 'path'
+import fs from 'fs';
+
 const router = express.Router()
 const UserController = require('../controllers/UserController')
 
@@ -25,6 +27,6 @@ const imageUpload = multer({
 // Authorization 
 router.post('/register', UserController.register);
 router.post('/login', UserController.login)
-router.post('/img', imageUpload.single('image'), UserController.uploadImage)
+router.post('/img', imageUpload.single('image'), UserController.uploadImage);
 
 module.exports = router

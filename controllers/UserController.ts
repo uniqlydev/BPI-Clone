@@ -1,12 +1,14 @@
 import User from '../model/User';
+import path from 'path'
+import fs from 'fs';
 import pool from '../model/database';
 import IDGenerator from '../utils/IDGenerator';
 import Hash from '../utils/HashUtility';
 import Validator from '../utils/Validator';
 import { body, validationResult } from 'express-validator';
 import multer from 'multer';
-import RegisterRequest from '../Interfaces/RegisterRequest';
-import LoginRequest from '../Interfaces/LoginRequest';
+import RegisterRequest from '../interfaces/RegisterRequest';
+import LoginRequest from '../interfaces/LoginRequest';
 import { Request, Response } from 'express';
 
 
@@ -148,6 +150,27 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
         // Execute the query
         const result = await pool.query(query, values);
         console.log('Profile picture updated successfully:', result.rowCount);
+
+        console.log(req.file !== undefined ? req.file : 'No file uploaded');
+
+        // Save the file to /images
+        const destination = path.join(__dirname, '../images'); // Specify your destination directory
+        const filename = Date.now() + '-' + req.file!.originalname;
+    
+        fs.writeFile(path.join(destination, filename), req.file!.buffer, (err) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Error saving image.');
+            }
+    
+            console.log('File saved successfully:', filename);
+    
+            // Optionally, you can respond with JSON containing the file path or other metadata
+            res.status(200).json({
+                message: 'File uploaded successfully',
+                filePath: path.join('/images', filename),
+            });
+        });
 
         res.status(200).json({ message: 'Profile picture updated successfully', fileType });
     } catch (error) {
