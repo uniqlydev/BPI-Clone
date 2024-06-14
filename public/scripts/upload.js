@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.text();
-            console.log(data); // Output the response from the server
+            alert("File uploaded successfully");
 
         } catch (error) {
             alert("Failed to upload file. Please try again.")

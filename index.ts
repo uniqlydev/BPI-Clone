@@ -79,7 +79,7 @@ try {
 
 
 
-// app.use('/api', apiLimiter);
+app.use('/api', apiLimiter);
 
 // Routes
 app.use('/api/users', require('./routers/userRouter'));

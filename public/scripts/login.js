@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }).then(data => {
                 console.log(data);
-                window.location.href = '/';
+                window.location.href = '/profile';
             }).catch(error => {
                 console.log(error);
             });
