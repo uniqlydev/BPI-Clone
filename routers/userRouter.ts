@@ -14,6 +14,7 @@ const imageUpload = multer({
     fileFilter: (req, file, cb) => {
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (allowedTypes.includes(file.mimetype)) {
+            console.log('File is allowed');
             cb(null, true);
         } else {
             cb(new Error('Only JPEG, PNG, and JPG files are allowed.'));
@@ -28,5 +29,6 @@ const imageUpload = multer({
 router.post('/register', UserController.register);
 router.post('/login', UserController.login)
 router.post('/img', imageUpload.single('image'), UserController.uploadImage);
+router.post('/logout', UserController.logout)
 
 module.exports = router

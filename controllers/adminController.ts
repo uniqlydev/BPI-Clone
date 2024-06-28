@@ -4,8 +4,6 @@ import pool from '../model/database';
 import Hash from '../utils/HashUtility';
 
 
-
-
 exports.login = (req: any, res: any) => {
     // Sanitize
     const errors = validationResult(req);
@@ -17,7 +15,7 @@ exports.login = (req: any, res: any) => {
     if (Validator.isEmail(req.body.email) === false) 
         return res.status(400).send("Invalid email address");
 
-    const query = "SELECT * FROM Users WHERE email = $1 AND role = 'superuser'";
+    const query = "SELECT * FROM Users WHERE email = $1 AND role = 'superuser' LIMIT 1";
 
     pool.query(query, [req.body.email], async (err: string, result: { rows: any; }) => {
         if (err) {
@@ -28,6 +26,8 @@ exports.login = (req: any, res: any) => {
             const user = result.rows[0];
             const hasher = new Hash();
             const isValid = await hasher.comparePassword(req.body.password, user.password);
+            // Remove user: { email: 'bomber8183@gmail.com', authenticated: true }, from session
+            req.session.user = undefined;
             if (isValid) {
                 req.session.admin_authenticated = true;
                 req.session.admin = user;
@@ -45,6 +45,15 @@ exports.login = (req: any, res: any) => {
              // User is not an admin account
             return res.status(400).send('User not found.');
         }
+    });
+};
+
+exports.logout = (req: any, res: any) => {
+    req.session.destroy((err: any) => {
+        if (err) {
+            return res.status(500).send('Internal Server Error');
+        }
+        res.status(200).send('Logged out successfully');
     });
 };
 

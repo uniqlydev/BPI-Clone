@@ -11,8 +11,8 @@ import morgan from 'morgan'
 
 
 // Loading SSL cert and key from dotenv
-const private_key = fs.readFileSync(path.resolve(__dirname, 'server.key'),'utf-8');
-const certificate = fs.readFileSync(path.resolve(__dirname, 'server.cert'), 'utf8');
+const private_key = fs.readFileSync(path.resolve(__dirname, '../server.key'),'utf-8');
+const certificate = fs.readFileSync(path.resolve(__dirname, '../server.cert'), 'utf8');
 
 
 // Set up SSL
@@ -41,15 +41,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, '../views'));
+app.use(express.static(path.join(__dirname, '../public')));
 
 
 
 try {
   // User 
   app.use(session({
-    secret: process.env.SESSION_SECRET || require('crypto').randomBytes(64).toString('hex'),
+    secret: process.env.SESSION_SECRET || require('crypto').randomBytes(16).toString('hex'),
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -62,7 +62,7 @@ try {
   // Admin
   app.use(session
     ({
-      secret: process.env.SESSION_SECRET_ADMIN || require('crypto').randomBytes(64).toString('hex'),
+      secret: process.env.SESSION_SECRET_ADMIN || require('crypto').randomBytes(16).toString('hex'),
       resave: false,
       saveUninitialized: true,
       cookie: {
@@ -79,7 +79,7 @@ try {
 
 
 
-// app.use('/api', apiLimiter);
+app.use('/api', apiLimiter);
 
 // Routes
 app.use('/api/users', require('./routers/userRouter'));
@@ -111,6 +111,18 @@ app.get('/admin/dashboard', (req: any, res) => {
   const adminSession = req.session;
 
   console.log('Admin session:', adminSession);
+
+  if (req.session.user !== undefined) {
+    return res.status(403).send('Unauthorized');
+  }
+
+  if (req.session.admin_authenticated !== true) {
+    return res.status(403).send('Unauthorized');
+  }
+
+  if (req.session.admin === undefined) {
+    return res.status(403).send('Unauthorized');
+  }
   
   res.render('admin_dashboard');
 });

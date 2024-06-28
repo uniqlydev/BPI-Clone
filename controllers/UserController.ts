@@ -78,7 +78,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
         return res.status(400).send("Invalid email address");
 
     // Retrieve the user with the email and password 
-    const user = "SELECT password FROM Users WHERE email = $1 LIMIT 1;"
+    const user = "SELECT password FROM Users WHERE email = $1 AND role = 'user' LIMIT 1;"
     const values = [req.body.email];
 
     pool.query(user, values, async (err: string, result: { rows: any; }) => {
@@ -91,6 +91,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
             const hasher = new Hash();
             const isMatch = await hasher.comparePassword(req.body.password, hashedPassword);
             if (isMatch) {
+                // Refresh the session
                 req.session.user = {
                     email: req.body.email,
                     authenticated: true
@@ -106,18 +107,16 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
     });
 
 
-
-
 };
 
 exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: Response) => {
     // Check if user is authenticated
     if (!req.session.user || !req.session.user.authenticated) {
-        return res.status(401).send('Unauthorized');
+        return res.status(401).json({message: "Unauthorized"});
     }
 
     if (!req.file || !req.file.buffer) {
-        return res.status(400).send('No file uploaded.');
+        return res.status(400).json({message: "No file uploaded"});
     }
 
     const buffer = req.file.buffer;
@@ -175,8 +174,16 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
         res.status(200).json({ message: 'Profile picture updated successfully', fileType });
     } catch (error) {
         console.error('Error updating profile picture:', error);
-        res.status(500).send('Internal server error');
+        res.status(500).json({ message: 'An error occurred' });
     }
 };
-  
+
+exports.logout = (req: Request, res: Response) => {
+    req.session.destroy((err: any) => {
+        if (err) {
+            return res.status(500).send('Internal Server Error');
+        }
+        res.status(200).send('Logged out successfully');
+    });
+}
 
