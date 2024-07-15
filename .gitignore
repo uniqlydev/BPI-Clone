@@ -37,3 +37,4 @@ images/*
 !public/**/*.js
 
 *.js
+.vercel

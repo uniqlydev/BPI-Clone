@@ -10,6 +10,7 @@ import multer from 'multer';
 import RegisterRequest from '../interfaces/RegisterRequest';
 import LoginRequest from '../interfaces/LoginRequest';
 import { Request, Response } from 'express';
+import { QueryResult } from 'pg';
 
 
 
@@ -81,7 +82,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
     const user = "SELECT password FROM Users WHERE email = $1 AND role = 'user' LIMIT 1;"
     const values = [req.body.email];
 
-    pool.query(user, values, async (err: string, result: { rows: any; }) => {
+    pool.query(user, values, async (err: Error, result: QueryResult<any>) => {
         if (err) {
             console.error('Error executing query', err); // Log the error for debugging
             return res.status(400).send(err); // Send the error in the response
