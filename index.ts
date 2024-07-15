@@ -127,6 +127,25 @@ app.get('/admin/dashboard', (req: any, res) => {
   res.render('admin_dashboard');
 });
 
+app.get('/transfer', (req, res) => {
+  res.render('function_transfer');
+});
+
+app.get('/withdraw', (req, res) => {
+  res.render('function_withdraw');
+});
+
+app.get('/deposit', (req, res) => {
+  res.render('function_deposit');
+});
+
+app.get('/load', (req, res) => {
+  res.render('function_load');
+});
+
+app.get('/billspayment', (req, res) => {
+  res.render('function_bills');
+});
 
 app.get('/profile', (req: any, res: { render: (arg0: string) => void }) => {
   console.log('Session:', req.session);
@@ -137,3 +156,5 @@ const httpsServer = https.createServer(server_credentials,app);
 httpsServer.listen(443, () => {
   console.log('HTTPS Server running on port 443');
 });
+
+

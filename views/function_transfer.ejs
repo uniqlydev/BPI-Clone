@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Money</title>
+    <link rel="stylesheet" href="styles/colors.css">
+    <link rel="stylesheet" href="styles/fonts.css">
+    <link rel="stylesheet" href="styles/transfer.css">
+    <script src="scripts/upload.js"></script>
+</head>
+<body>
+    <div class="splitscreen">
+        <div class="left">
+            <h1>Bank Transfer</h1>
+            
+        </div>
+        <div class="right">
+            <div class="middle">
+                <h2> Provide transfer details here</h2>
+                 <form method="post" action="">
+                    <p>transfer from:</p>
+                    <input type="text" name="sender" id="sender" placeholder="account number">
+                    <p>transfer to:</p>
+                    <input type="text" name="accountName" id="accountName" placeholder="account name">
+                    <input type = "text" name="receiver" id="receiver" placeholder="account number">
+                    <input type="text" name="amount" id="amount" placeholder="amount">
+                    <input type = "text" name="description" id="description" placeholder="transfer purpose" style = "height: 120px;">
+                    <button type="button" id="submit">Transfer</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+    
+</body>
+</html>
