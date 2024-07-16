@@ -1,4 +1,4 @@
-class billsPayment {
+class transfer {
 
     private id: String;
     private sender: Number;
@@ -41,4 +41,4 @@ class billsPayment {
     }
 }
 
-export default billsPayment;
+export default transfer;

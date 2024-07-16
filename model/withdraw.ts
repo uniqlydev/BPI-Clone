@@ -1,23 +1,17 @@
 class withdraw {
 
-    private id: String;
-    private bank: String;
+    private accountNum: String;
     private amount: Number;
 
-    constructor(id: String, bank: String, amount: Number) {
-        this.id = id;
-        this.bank = bank;
+    constructor(accountNum: String, amount: Number) {
+        this.accountNum = accountNum;
         this.amount = amount;
     }
 
-    public getID(): String {
-        return this.id;
+    public getAccountNum(): String {
+        return this.accountNum;
     }
 
-    public getBank(): String {
-        return this.bank;
-    }
-    
     public getAmount(): Number {
         return this.amount;
     }

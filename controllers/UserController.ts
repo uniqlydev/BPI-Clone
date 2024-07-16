@@ -10,6 +10,7 @@ import multer from 'multer';
 import RegisterRequest from '../interfaces/RegisterRequest';
 import LoginRequest from '../interfaces/LoginRequest';
 import { Request, Response } from 'express';
+import Deposit from '../model/deposit';
 
 
 
@@ -40,7 +41,7 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
         try {
             const client = await pool.connect();
             const query = `
-              INSERT INTO users (id, first_name, last_name, email, password, phone_number)
+              INSERT INTO public.users (id, first_name, last_name, email, password, phone_number)
               VALUES ($1, $2, $3, $4, $5, $6)
             `;
             const values = [id, first_name, last_name, email, hashed_password, phone_number];
@@ -78,7 +79,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
         return res.status(400).send("Invalid email address");
 
     // Retrieve the user with the email and password 
-    const user = "SELECT password FROM Users WHERE email = $1 AND role = 'user' LIMIT 1;"
+    const user = "SELECT password FROM public.users WHERE email = $1 AND role = 'user' LIMIT 1;"
     const values = [req.body.email];
 
     pool.query(user, values, async (err: string, result: { rows: any; }) => {
@@ -142,7 +143,7 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
     }
 
     // Prepare query to update user's profile picture
-    const query = 'UPDATE Users SET profile_picture = $1 WHERE email = $2';
+    const query = 'UPDATE public.users SET profile_picture = $1 WHERE email = $2';
     const values = [buffer, req.session.user.email];
 
     try {
@@ -186,4 +187,69 @@ exports.logout = (req: Request, res: Response) => {
         res.status(200).send('Logged out successfully');
     });
 }
+
+
+exports.deposit = async (req: Request, res: Response) => {
+
+    // CHange account Num to session 
+    const {accountName, accountNum, date, checkNum} = req.body;
+
+    // Create new deposit class 
+    const ds = new Deposit(accountName, accountNum, date, checkNum); 
+
+    const client = await pool.connect(); 
+
+    const query = 'CALL createDeposit($1,$2,$3)';
+    const values = [ds.getAccountNumber(), ds.getCheckNumber(), ds.getDate()];
+
+    try {
+        await client.query(query, values);
+        await client.release();
+        res.status(201).json({ message: 'Deposit created successfully' });
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+};
+
+exports.withdraw = async (req: Request, res: Response) => {
+    // Acount num needs to be in the session 
+    const {accountNum, amount} = req.body;
+
+    const client = await pool.connect();
+    const query = 'CALL createWithdraw($1,$2)';
+
+    const values = [accountNum, amount];
+
+    try {
+        await client.query(query, values);
+        await client.release();
+        res.status(201).json({ message: 'Withdraw created successfully' });
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+}
+
+exports.transfer = async (req: Request, res: Response) => {
+
+    const {accountNum, receiver, amount} = req.body;
+
+    const client = await pool.connect();
+    const query = 'CALL createTransfer($1,$2,$3)';
+
+    const values = [accountNum, receiver, amount];
+
+    try {
+        await client.query(query, values);
+        await client.release();
+        res.status(201).json({ message: 'Transfer created successfully' });
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+
+}
+
+
 

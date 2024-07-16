@@ -1,24 +1,17 @@
-class billsPayment {
+class Deposit {
 
-    private id: String;
     private accountName: String;
     private accountNumber: Number;
     private date: Date;
-    private checkNumber: String;
-    private amount: Number;
+    private checkNumber: Number;
 
-    constructor(id: String, accountName: String, accountNumber: Number,date: Date, checkNumber: String, amount: Number) {
-        this.id = id;
+    constructor(accountName: String, accountNumber: Number,date: Date, checkNumber: Number) {
         this.accountName = accountName;
         this.accountNumber = accountNumber;
         this.date = date;
         this.checkNumber = checkNumber;
-        this.amount = amount;
     }
 
-    public getID(): String {
-        return this.id;
-    }
 
     public getAccountName(): String {
         return this.accountName;
@@ -32,13 +25,9 @@ class billsPayment {
         return this.date;
     }
 
-    public getCheckNumber(): String {
+    public getCheckNumber(): Number {
         return this.checkNumber;
     }
 
-    public getAmount(): Number {
-        return this.amount;
-    }
 }
-
-export default billsPayment;
+export default Deposit;
