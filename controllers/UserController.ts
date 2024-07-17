@@ -1,15 +1,15 @@
-import User from '../model/User';
 import path from 'path'
 import fs from 'fs';
 import pool from '../model/database';
 import IDGenerator from '../utils/IDGenerator';
 import Hash from '../utils/HashUtility';
 import Validator from '../utils/Validator';
-import { body, validationResult } from 'express-validator';
-import multer from 'multer';
+import {validationResult } from 'express-validator';
 import RegisterRequest from '../interfaces/RegisterRequest';
 import LoginRequest from '../interfaces/LoginRequest';
 import { Request, Response } from 'express';
+import Deposit from '../model/deposit';
+import moment from 'moment';
 
 
 
@@ -40,7 +40,7 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
         try {
             const client = await pool.connect();
             const query = `
-              INSERT INTO users (id, first_name, last_name, email, password, phone_number)
+              INSERT INTO public.users (id, first_name, last_name, email, password, phone_number)
               VALUES ($1, $2, $3, $4, $5, $6)
             `;
             const values = [id, first_name, last_name, email, hashed_password, phone_number];
@@ -50,7 +50,8 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
             // Put in session
             req.session.user = {
                 email: email,
-                authenticated: true
+                authenticated: true,
+                id: id.toString()
             };
 
             res.status(201).json({ message: 'User created successfully' });
@@ -78,26 +79,37 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
         return res.status(400).send("Invalid email address");
 
     // Retrieve the user with the email and password 
-    const user = "SELECT password FROM Users WHERE email = $1 AND role = 'user' LIMIT 1;"
+    const userQuery = "SELECT id, password FROM public.users WHERE email = $1 AND role = 'user' LIMIT 1;";
     const values = [req.body.email];
 
-    pool.query(user, values, async (err: string, result: { rows: any; }) => {
+    pool.query(userQuery, values, async (err: string, result: { rows: any[]; }) => {
         if (err) {
             console.error('Error executing query', err); // Log the error for debugging
             return res.status(400).send(err); // Send the error in the response
         }
         if (result && result.rows && result.rows.length > 0) {
-            const hashedPassword = result.rows[0].password;
+            const user = result.rows[0];
+            const hashedPassword = user.password;
             const hasher = new Hash();
             const isMatch = await hasher.comparePassword(req.body.password, hashedPassword);
             if (isMatch) {
-                // Refresh the session
-                req.session.user = {
-                    email: req.body.email,
-                    authenticated: true
-                };
-                return res.status(200).json({ message: 'Login successful' });
-
+                // Audit logging
+                const auditQuery = "INSERT INTO audit_activity VALUES ($1, 'SUCCESS', 'User logged in', NOW());";
+                const auditValues = [user.id];
+                
+                pool.query(auditQuery, auditValues, (auditErr: string) => {
+                    if (auditErr) {
+                        console.error('Error logging audit activity', auditErr);
+                        // Log error but continue with login success
+                    }
+                    // Refresh the session
+                    req.session.user = {
+                        email: req.body.email,
+                        authenticated: true,
+                        id: user.id
+                    };
+                    return res.status(200).json({ message: 'Login successful' });
+                });
             } else {
                 return res.status(400).json({ message: 'Invalid email or password' });
             }
@@ -106,17 +118,16 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
         }
     });
 
-
 };
 
 exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: Response) => {
     // Check if user is authenticated
-    if (!req.session.user || !req.session.user.authenticated) {
-        return res.status(401).json({message: "Unauthorized"});
+    if (!req.session?.user?.authenticated) {
+        return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (!req.file || !req.file.buffer) {
-        return res.status(400).json({message: "No file uploaded"});
+    if (!req.file?.buffer) {
+        return res.status(400).json({ message: "No file uploaded" });
     }
 
     const buffer = req.file.buffer;
@@ -142,7 +153,7 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
     }
 
     // Prepare query to update user's profile picture
-    const query = 'UPDATE Users SET profile_picture = $1 WHERE email = $2';
+    const query = 'UPDATE public.users SET profile_picture = $1 WHERE email = $2';
     const values = [buffer, req.session.user.email];
 
     try {
@@ -150,32 +161,32 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
         const result = await pool.query(query, values);
         console.log('Profile picture updated successfully:', result.rowCount);
 
-        console.log(req.file !== undefined ? req.file : 'No file uploaded');
+        console.log(req.file ? req.file : 'No file uploaded');
 
         // Save the file to /images
         const destination = path.join(__dirname, '../images'); // Specify your destination directory
-        const filename = Date.now() + '-' + req.file!.originalname;
-    
-        fs.writeFile(path.join(destination, filename), req.file!.buffer, (err) => {
+        const filename = `${Date.now()}-${req.file.originalname}`;
+
+        fs.writeFile(path.join(destination, filename), req.file.buffer, (err) => {
             if (err) {
                 console.error(err);
                 return res.status(500).send('Error saving image.');
             }
-    
+
             console.log('File saved successfully:', filename);
-    
-            // Optionally, you can respond with JSON containing the file path or other metadata
-            res.status(200).json({
+
+            // Respond with JSON containing the file path or other metadata
+            return res.status(200).json({
                 message: 'File uploaded successfully',
                 filePath: path.join('/images', filename),
             });
         });
 
-        res.status(200).json({ message: 'Profile picture updated successfully', fileType });
     } catch (error) {
         console.error('Error updating profile picture:', error);
-        res.status(500).json({ message: 'An error occurred' });
+        return res.status(500).json({ message: 'An error occurred' });
     }
+
 };
 
 exports.logout = (req: Request, res: Response) => {
@@ -186,4 +197,101 @@ exports.logout = (req: Request, res: Response) => {
         res.status(200).send('Logged out successfully');
     });
 }
+
+
+exports.deposit = async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).send("Invalid input");
+    }
+
+    // CHange account Num to session 
+    const {accountNum, date, amount ,checkNum} = req.body;
+
+    // yyyy-mm-dd
+    const formatted_date = moment(date, 'YYYY-MM-DD');
+
+    // convert checnum to int
+    const clean_checkNum = parseInt(checkNum);
+
+    // Convert amount to double
+    const clean_amount = parseFloat(amount);
+
+
+    // Create new deposit class 
+    const ds = new Deposit(accountNum, formatted_date.toDate() ,clean_checkNum); 
+
+    const client = await pool.connect(); 
+
+    const query = 'CALL createDeposit($1,$2,$3,$4)';
+    const values = [ds.getAccountNumber(), ds.getCheckNumber(), clean_amount,ds.getDate()];
+
+    try {
+        await client.query(query, values);
+        await client.release();
+        res.status(201).json({ message: 'Deposit created successfully' });
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+};
+
+exports.withdraw = async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).send("Invalid input");
+    }
+
+    // Acount num needs to be in the session 
+    const {accountNum, amount} = req.body;
+
+    const converted_amount = parseFloat(amount);
+
+    const client = await pool.connect();
+    const query = 'CALL createWithdraw($1,$2)';
+
+    const values = [accountNum, converted_amount];
+
+    try {
+        await client.query(query, values);
+        await client.release();
+        res.status(201).json({ message: 'Withdraw created successfully' });
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+}
+
+exports.transfer = async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).send("Invalid input");
+    }
+
+    const {accountNum, receiver, amount} = req.body;
+
+    const converted_amount = parseInt(amount);
+
+    const client = await pool.connect();
+    const query = 'CALL createTransfer($1,$2,$3)';
+
+    const values = [accountNum, receiver, converted_amount];
+
+    try {
+        await client.query(query, values);
+        await client.release();
+        res.status(201).json({ message: 'Transfer created successfully' });
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+
+}
+
+
 

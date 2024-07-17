@@ -3,14 +3,13 @@ const Pool = require('pg').Pool
 
 // Load .env
 require('dotenv').config();
-
 const pool = new Pool({
     host: "localhost",
     user: "app_user",
-    database: process.env.DATABASE,
-    password: process.env.PASSWORD,
-    port: process.env.DB_PORT,
-})
+    database: "bpi",
+    password: "password",
+    port: "5432"
+});
 
 export default pool;
 

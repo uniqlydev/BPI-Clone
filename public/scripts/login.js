@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }).then(data => {
                 console.log(data);
-                window.location.href = '/profile';
+                window.location.href = '/deposit';
             }).catch(error => {
                 console.log(error);
             });

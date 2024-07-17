@@ -34,6 +34,4 @@ server.cert
 images/*
 
 # Ignore all js files except public
-!public/**/*.js
 
-*.js
