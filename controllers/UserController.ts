@@ -79,27 +79,37 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
         return res.status(400).send("Invalid email address");
 
     // Retrieve the user with the email and password 
-    const user = "SELECT password FROM public.users WHERE email = $1 AND role = 'user' LIMIT 1;"
+    const userQuery = "SELECT id, password FROM public.users WHERE email = $1 AND role = 'user' LIMIT 1;";
     const values = [req.body.email];
 
-    pool.query(user, values, async (err: string, result: { rows: any; }) => {
+    pool.query(userQuery, values, async (err: string, result: { rows: any[]; }) => {
         if (err) {
             console.error('Error executing query', err); // Log the error for debugging
             return res.status(400).send(err); // Send the error in the response
         }
         if (result && result.rows && result.rows.length > 0) {
-            const hashedPassword = result.rows[0].password;
+            const user = result.rows[0];
+            const hashedPassword = user.password;
             const hasher = new Hash();
             const isMatch = await hasher.comparePassword(req.body.password, hashedPassword);
             if (isMatch) {
-                // Refresh the session
-                req.session.user = {
-                    email: req.body.email,
-                    authenticated: true,
-                    id: result.rows[0].id
-                };
-                return res.status(200).json({ message: 'Login successful' });
-
+                // Audit logging
+                const auditQuery = "INSERT INTO audit_activity VALUES ($1, 'SUCCESS', 'User logged in', NOW());";
+                const auditValues = [user.id];
+                
+                pool.query(auditQuery, auditValues, (auditErr: string) => {
+                    if (auditErr) {
+                        console.error('Error logging audit activity', auditErr);
+                        // Log error but continue with login success
+                    }
+                    // Refresh the session
+                    req.session.user = {
+                        email: req.body.email,
+                        authenticated: true,
+                        id: user.id
+                    };
+                    return res.status(200).json({ message: 'Login successful' });
+                });
             } else {
                 return res.status(400).json({ message: 'Invalid email or password' });
             }
@@ -107,7 +117,6 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
             return res.status(400).json({ message: 'Invalid email or password' });
         }
     });
-
 
 };
 
@@ -229,13 +238,22 @@ exports.deposit = async (req: Request, res: Response) => {
 };
 
 exports.withdraw = async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).send("Invalid input");
+    }
+
     // Acount num needs to be in the session 
     const {accountNum, amount} = req.body;
+
+    const converted_amount = parseFloat(amount);
 
     const client = await pool.connect();
     const query = 'CALL createWithdraw($1,$2)';
 
-    const values = [accountNum, amount];
+    const values = [accountNum, converted_amount];
 
     try {
         await client.query(query, values);
@@ -249,12 +267,20 @@ exports.withdraw = async (req: Request, res: Response) => {
 
 exports.transfer = async (req: Request, res: Response) => {
 
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).send("Invalid input");
+    }
+
     const {accountNum, receiver, amount} = req.body;
+
+    const converted_amount = parseInt(amount);
 
     const client = await pool.connect();
     const query = 'CALL createTransfer($1,$2,$3)';
 
-    const values = [accountNum, receiver, amount];
+    const values = [accountNum, receiver, converted_amount];
 
     try {
         await client.query(query, values);

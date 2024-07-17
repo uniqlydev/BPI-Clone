@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles/colors.css">
     <link rel="stylesheet" href="styles/fonts.css">
     <link rel="stylesheet" href="styles/transfer.css">
-    <script src="scripts/upload.js"></script>
+    <script src="scripts/transfer.js"></script>
 </head>
 <body>
     <div class="splitscreen">
@@ -19,10 +19,9 @@
             <div class="middle">
                 <h2> Provide transfer details here</h2>
                  <form method="post" action="">
-                    <p>transfer to:</p>
-                    <input type="text" name="accountNum" id="accountName" placeholder="account name">
-                    <input type = "text" name="receiver" id="receiver" placeholder="account number">
-                    <input type="text" name="amount" id="amount" placeholder="amount">
+                    <input type="text" name="accountNum" id="accountNum" placeholder="Enter your account number:">
+                    <input type = "text" name="receiver" id="receiver" placeholder="Transfer to:">
+                    <input type="number" name="amount" id="amount" placeholder="amount">
                     <button type="button" id="submit">Transfer</button>
                 </form>
             </div>
