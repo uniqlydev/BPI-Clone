@@ -58,26 +58,10 @@ try {
       maxAge: 3600000 // last for only 1 hour
     }
   }))
-
-  // Admin
-  app.use(session
-    ({
-      secret: process.env.SESSION_SECRET_ADMIN || require('crypto').randomBytes(16).toString('hex'),
-      resave: false,
-      saveUninitialized: true,
-      cookie: {
-        secure: true,
-        httpOnly: true,
-        maxAge: 3600000 // last for only 1 hour
-      }
-    }))
-
 }catch (e) {
   console.error('Error setting up session:', e);
   throw new Error('Failed to set up session');
 }
-
-
 
 app.use('/api', apiLimiter);
 
@@ -128,15 +112,27 @@ app.get('/admin/dashboard', (req: any, res) => {
 });
 
 app.get('/transfer', (req, res) => {
-  res.render('function_transfer');
+
+  if (req.session.user === undefined) {
+    res.render('status_403')
+  }else {
+    res.render('function_transfer');
+  }
+
 });
 
 app.get('/withdraw', (req, res) => {
-  res.render('function_withdraw');
+
+  if (req.session.user === undefined) {
+    res.render('status_403')
+  }else res.render('function_withdraw');
 });
 
 app.get('/deposit', (req, res) => {
-  res.render('function_deposit');
+
+  if (req.session.user === undefined) {
+    res.render('status_403')
+  }else res.render('function_deposit');
 });
 
 app.get('/load', (req, res) => {
@@ -148,8 +144,10 @@ app.get('/billspayment', (req, res) => {
 });
 
 app.get('/profile', (req: any, res: { render: (arg0: string) => void }) => {
-  console.log('Session:', req.session);
-  res.render('upload');
+
+  if (req.session.user === undefined) {
+    res.render('status_403')
+  }else  res.render('upload');
 });
 const httpsServer = https.createServer(server_credentials,app);
 
