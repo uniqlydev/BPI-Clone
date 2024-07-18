@@ -1,0 +1,36 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Ensure full viewport height */
+    margin: 0;
+    background-color: #f0f0f0; /* Light background color */
+}
+.container {
+    width: 80%; /* Adjust width as needed */
+    margin: auto; /* Center horizontally */
+    padding: 20px;
+    background-color: white; /* White background for the container */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Optional: Add shadow for depth */
+    border-radius: 8px; /* Optional: Add rounded corners */
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px; /* Add margin at the top */
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd; /* Optional: Add bottom border */
+}
+th {
+    background-color: #f2f2f2; /* Optional: Gray background for header */
+}
+form {
+    display: flex;
+    align-items: center;
+}
+button {
+    margin-left: 10px; /* Optional: Adjust button placement */
+}

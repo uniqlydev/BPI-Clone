@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Users</title>
+    <link rel="stylesheet" href="../styles/colors.css">
+    <link rel="stylesheet" href="../styles/fonts.css">
+    <link rel="stylesheet" href="../styles/transfer.css">
+    <link rel="stylesheet" href="../styles/table.css">
+    <script src="../scripts/admin_updateuser.js"></script>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Id</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Status</th>
+        </tr>
+        <% users.forEach(user => { %>
+            <tr>
+                <td><%= user.id %></td>
+                <td><%= user.first_name %></td>
+                <td><%= user.last_name %></td>
+                <td>
+                    <form class="update-form" method="put" action="">
+                        <input type="hidden" name="id" value="<%= user.id %>">
+                        <select name="status">
+                            <option value="active" <%= user.is_active ? 'selected' : '' %>>Active</option>
+                            <option value="inactive" <%= !user.is_active ? 'selected' : '' %>>Inactive</option>
+                        </select>
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+        <% }) %>
+    </table>

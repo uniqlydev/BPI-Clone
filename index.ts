@@ -7,6 +7,7 @@ import fs from 'fs'
 import session from 'express-session'
 import rate_limiter from 'express-rate-limit'
 import morgan from 'morgan'
+import pool from './model/database'
 
 
 
@@ -111,6 +112,66 @@ app.get('/admin/dashboard', (req: any, res) => {
   res.render('admin_dashboard');
 });
 
+app.get('/admin/createcheque', (req: any, res) => {
+  const adminSession = req.session;
+
+  console.log('Admin session:', adminSession);
+
+  if (req.session.user !== undefined) {
+    return res.status(403).send('Unauthorized');
+  }
+
+  if (req.session.admin_authenticated !== true) {
+    return res.status(403).send('Unauthorized');
+  }
+
+  if (req.session.admin === undefined) {
+    return res.status(403).send('Unauthorized');
+  }
+  
+  res.render('admin_cheque');
+});
+
+
+
+app.get('/admin/users', (req: any, res) => {
+  // const adminSession = req.session;
+
+  // console.log('Admin session:', adminSession);
+
+  // if (req.session.user !== undefined) {
+  //   return res.status(403).send('Unauthorized');
+  // }
+
+  // if (req.session.admin_authenticated !== true) {
+  //   return res.status(403).send('Unauthorized');
+  // }
+
+  // if (req.session.admin === undefined) {
+  //   return res.status(403).send('Unauthorized');
+  // }
+
+  const query = "SELECT id, first_name, last_name, is_active FROM users WHERE role='user'"
+
+  pool.query(query, (err: string, result: { rows: any; }) => {
+    if (err) {
+      console.error('Error executing query', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result && result.rows && result.rows.length > 0) {
+      const users = result.rows;
+
+      console.log(users);
+
+      res.render('admin_users', { users });
+    } else {
+      res.render('admin_users', { users: [] });
+    }
+  });
+});
+
+
 app.get('/transfer', (req, res) => {
 
   if (req.session.user === undefined) {
@@ -135,13 +196,6 @@ app.get('/deposit', (req, res) => {
   }else res.render('function_deposit');
 });
 
-app.get('/load', (req, res) => {
-  res.render('function_load');
-});
-
-app.get('/billspayment', (req, res) => {
-  res.render('function_bills');
-});
 
 app.get('/profile', (req: any, res: { render: (arg0: string) => void }) => {
 
@@ -149,6 +203,8 @@ app.get('/profile', (req: any, res: { render: (arg0: string) => void }) => {
     res.render('status_403')
   }else  res.render('upload');
 });
+
+
 const httpsServer = https.createServer(server_credentials,app);
 
 httpsServer.listen(443, () => {

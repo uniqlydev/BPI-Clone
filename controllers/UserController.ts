@@ -57,10 +57,24 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
             res.status(201).json({ message: 'User created successfully' });
           } catch (error) {
             console.error('Error executing query:', error);
-            res.status(500).json({ message: 'An error occurred' });
+
+            if (process.env.ENV === 'debug') {
+                res.status(500).json({
+                    message: 'An error occurred:' + error,
+                })
+            }else {
+                res.status(500).json({ message: 'An error occurred' });
+            }
         }
     }catch(err){
         console.error('Error executing query', err); // Log the error for debugging
+
+        if (process.env.ENV === 'debug') {
+            res.status(500).json({
+                message: 'An error occured: ' + err
+            })
+        }
+
         return res.status
     }
 };
@@ -111,7 +125,15 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
                     return res.status(200).json({ message: 'Login successful' });
                 });
             } else {
-                return res.status(400).json({ message: 'Invalid email or password' });
+                if (process.env.ENV === 'debug') { 
+                    return res.status(500).json({
+                        message: 'An error has occured at: ' + err
+                    })
+                }else {
+                    return res.status(500).json({
+                        message: 'An error has occured'
+                    })
+                }
             }
         } else {
             return res.status(400).json({ message: 'Invalid email or password' });
