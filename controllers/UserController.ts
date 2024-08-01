@@ -4,7 +4,7 @@ import pool from '../model/database';
 import IDGenerator from '../utils/IDGenerator';
 import Hash from '../utils/HashUtility';
 import Validator from '../utils/Validator';
-import {validationResult } from 'express-validator';
+import {validationResult} from 'express-validator';
 import RegisterRequest from '../interfaces/RegisterRequest';
 import LoginRequest from '../interfaces/LoginRequest';
 import { Request, Response } from 'express';
@@ -51,7 +51,7 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
             req.session.user = {
                 email: email,
                 authenticated: true,
-                id: id.toString()
+                id: id.toString(),
             };
 
             res.status(201).json({ message: 'User created successfully' });
@@ -120,7 +120,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
                     req.session.user = {
                         email: req.body.email,
                         authenticated: true,
-                        id: user.id
+                        id: user.id,
                     };
                     return res.status(200).json({ message: 'Login successful' });
                 });
@@ -225,8 +225,11 @@ exports.deposit = async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).send("Invalid input");
+        return res.render('status/status_400', {
+            message: "Invalid input"
+        });
     }
+
 
     // CHange account Num to session 
     const {accountNum, date, amount ,checkNum} = req.body;
@@ -264,8 +267,11 @@ exports.withdraw = async (req: Request, res: Response) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        return res.status(400).send("Invalid input");
+        return res.render('status/status_400', {
+            message: "Invalid input"
+        });
     }
+
 
     // Acount num needs to be in the session 
     const {accountNum, amount} = req.body;
@@ -292,7 +298,9 @@ exports.transfer = async (req: Request, res: Response) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        return res.status(400).send("Invalid input");
+        return res.render('status/status_400', {
+            message: "Invalid input"
+        });
     }
 
     const {accountNum, receiver, amount} = req.body;
@@ -316,4 +324,35 @@ exports.transfer = async (req: Request, res: Response) => {
 }
 
 
+
+exports.updateProfile = async (req: Request, res: Response) => {
+
+    if (!req.session?.user?.authenticated) {
+        return res.render('status/status_403', {
+            message: "Unforbidden access."
+        });
+    }
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.render('status/status_400', {
+            message: "Invalid input"
+        });
+    }
+
+    const { firstName, lastName, phoneNumber } = req.body;
+
+    const query = 'UPDATE public.users SET first_name = $1, last_name = $2, phone_number = $3 WHERE email = $4';
+    const values = [firstName, lastName, phoneNumber, req.session.user.email];
+
+    try {
+        await pool.query(query, values);
+        return res.render('status/status_200.ejs')
+    } catch (error) {
+        return res.render('status/status_500.ejs', {
+            message: "Massive problem, LIKE HUGE"
+        })
+    }
+};
 

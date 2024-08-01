@@ -5,7 +5,7 @@ declare module 'express-session' {
     user: {
       email: string
       authenticated: boolean;
-      id: string; 
+      id: string;
     };
   }
 }

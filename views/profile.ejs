@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/colors.css">
+    <link rel="stylesheet" href="styles/fonts.css">
+    <link rel="stylesheet" href="styles/transfer.css">
+    <link rel="stylesheet" href="styles/navbar.css">
+    <title>Profile | Edit Profile</title>
+</head>
+<body>
+
+    <%- include('navbar.ejs')%>
+    <div class="splitscreen">
+        <div class="left">
+            <h2>Welcome bro! <%= user.getEmail() %></h2>
+        </div>
+        <div class="right">
+            <div class="middle">
+                <h2>Edit Profile:</h2>
+                <form method="post" action="api/users/profile/update">
+                    <input type="text" name="firstName" id="firstName" placeholder="First Name" value="<%= user.getFirstName() %>">
+                    <input type="text" name="lastName" id="lastName" placeholder="Last Name" value="<%= user.getLastName() %>">
+                    <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone Number" value="<%= user.getPhone() %>">
+                    <button type="submit" id="submit">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
