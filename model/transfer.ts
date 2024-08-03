@@ -1,13 +1,13 @@
 class transfer {
 
     private id: String;
-    private sender: Number;
+    private sender: String;
     private accountName: String;
-    private receiver: Number;
+    private receiver: String;
     private amount: Number;
     private description: String;
 
-    constructor(id: String, sender: Number, accountName: String, receiver: Number, amount: Number, description: String) {
+    constructor(id: String, sender: String, accountName: String, receiver: String, amount: Number, description: String) {
         this.id = id;
         this.sender = sender;
         this.accountName = accountName;
@@ -20,16 +20,17 @@ class transfer {
         return this.id;
     }
 
-    public getSender(): Number {
+
+    public getSender(): String {
         return this.sender;
+    }
+
+    public getReceiver(): String {
+        return this.receiver;
     }
 
     public getAccountName(): String {
         return this.accountName;
-    }
-
-    public getReceiver(): Number {
-        return this.receiver;
     }
 
     public getAmount(): Number {

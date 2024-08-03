@@ -16,16 +16,13 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(cheque)
         }).then(response => {
-            if (response.status === 201) {
-                alert('Cheque created successfully');
-                window.location.href = '/admin/createcheque';
-            } else {
-                alert('Cheque creation failed');
+            if (response.ok) {
+                alert('Cheque created');
+                window.location.href = '/admin/dashboard';
             }
         }).catch(error => {
             console.error('Error:', error);
         });
 
-        
     });
 });

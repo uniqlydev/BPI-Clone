@@ -1,0 +1,57 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: var(--background-main); /* Use theme background color */
+    font-family: var(--font-body);
+    color: var(--bpi-red); /* Use primary text color */
+}
+
+.container {
+    text-align: center;
+    background-color: var(--background-sidebar); /* Use theme sidebar color */
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    margin-bottom: 30px;
+    font-size: 2em;
+    color: var(--bpi-red); /* Use primary color for header */
+    font-family: var(--logo-font); /* Use logo font */
+}
+
+.dashboard-links {
+    list-style: none;
+    padding: 0;
+    /* Add spacign to each li */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+
+}
+
+.dashboard-links li {
+    margin: 15px 0;
+}
+
+.dashboard-links a {
+    text-decoration: none;
+    color: white; /* Ensure text is readable */
+    background-color: var(--button-primary); /* Use theme button color */
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.dashboard-links a:hover {
+    background-color: var(--button-disabled); /* Use theme button hover color */
+}
+
+.dashboard-links a:active {
+    background-color: var(--bpi-red); /* Use theme button active color */
+}

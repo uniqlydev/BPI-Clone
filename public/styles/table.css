@@ -5,6 +5,7 @@ body {
     height: 100vh; /* Ensure full viewport height */
     margin: 0;
     background-color: var(--background-main); /* Use theme background color */
+    font: var(--font-body); /* Use theme body font */
 }
 
 .container {
@@ -14,6 +15,7 @@ body {
     background-color: var(--background-sidebar); /* Use theme sidebar color */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for depth */
     border-radius: 8px; /* Optional: Add rounded corners */
+    animation: fadeIn 0.5s ease-in-out; /* Fade-in animation */
 }
 
 table {
@@ -26,6 +28,7 @@ th, td {
     padding: 10px;
     text-align: left;
     border-bottom: 1px solid #ddd; /* Optional: Add bottom border */
+    animation: slideIn 0.5s ease-in-out; /* Slide-in animation */
 }
 
 th {
@@ -50,9 +53,24 @@ button {
     padding: 10px 15px; /* Add padding for button */
     border-radius: 5px; /* Optional: Add rounded corners */
     cursor: pointer; /* Change cursor to pointer */
+    transition: background-color 0.3s; /* Smooth transition for background color */
+}
+
+button:hover {
+    background-color: var(--button-primary-hover); /* Use theme hover button color */
 }
 
 button:disabled {
     background-color: var(--button-disabled); /* Use theme disabled button color */
     cursor: not-allowed; /* Change cursor to not-allowed for disabled button */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }

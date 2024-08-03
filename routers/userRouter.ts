@@ -31,7 +31,6 @@ router.post('/login', UserController.login)
 router.post('/img', imageUpload.single('image'), UserController.uploadImage);
 router.post('/deposit', UserController.deposit);
 router.post('/withdraw', UserController.withdraw);
-router.post('/transfer', UserController.transfer);
 router.post('/profile/update', UserController.updateProfile);
 
 module.exports = router

@@ -1,12 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('submit').addEventListener('click', function() {
-        const accountNumber = document.getElementById('accountNum').value;
         const date = document.getElementById('date').value;
         const checkNum = document.getElementById('checkNum').value;
         const amount = document.getElementById('amount').value;
 
         const body = {
-            accountNum: accountNumber,
             date: date,
             checkNum: checkNum,
             amount: amount

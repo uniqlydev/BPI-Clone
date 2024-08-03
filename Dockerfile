@@ -17,3 +17,4 @@ EXPOSE 5432
 
 # Set the custom postgresql.conf as the configuration file
 CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+RUN echo "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";" >> /docker-entrypoint-initdb.d/01-enable-uuid.sql

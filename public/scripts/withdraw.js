@@ -1,14 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('submit').addEventListener('click', function() {
-        const accountNumber = document.getElementById('account').value;
         const amount = document.getElementById('amount').value;
 
         const body = {
-            accountNum: accountNumber,
             amount: amount
         };
-
-        console.log(body)
 
         // Create post request
         fetch('/api/users/withdraw', {

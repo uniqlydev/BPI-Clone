@@ -37,7 +37,7 @@ input {
     border-radius: 5px;
     font-family: var(--font-body);
     height: 30px;
-    
+
     background-color: var(--inputbox);
 }
 

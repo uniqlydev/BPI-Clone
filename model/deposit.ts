@@ -1,17 +1,17 @@
 class Deposit {
 
-    private accountNumber: Number;
+    private email: String;
     private date: Date;
     private checkNumber: Number;
 
-    constructor(accountNumber: Number,date: Date, checkNumber: Number) {
-        this.accountNumber = accountNumber;
+    constructor(email: String,date: Date, checkNumber: Number) {
+        this.email = email;
         this.date = date;
         this.checkNumber = checkNumber;
     }
 
-    public getAccountNumber(): Number {
-        return this.accountNumber;
+    public getEmail(): String {
+        return this.email;
     }
 
     public getDate(): Date {

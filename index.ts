@@ -150,15 +150,15 @@ app.get('/admin/users', (req: any, res) => {
 });
 
 
-app.get('/transfer', (req: any, res) => {
+// app.get('/transfer', (req: any, res) => {
 
-  if (req.session.user === undefined || req.session.user.userType === 'Admin') {
-    return res.render('status/status_403', {message: "Unforbidden access."});
-  }else {
-    res.render('function_transfer');
-  }
+//   if (req.session.user === undefined || req.session.user.userType === 'Admin') {
+//     return res.render('status/status_403', {message: "Unforbidden access."});
+//   }else {
+//     res.render('function_transfer');
+//   }
 
-});
+// });
 
 app.get('/withdraw', (req: any, res) => {
 

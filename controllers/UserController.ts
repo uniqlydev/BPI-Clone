@@ -41,10 +41,10 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
         try {
             const client = await pool.connect();
             const query = `
-              INSERT INTO public.users (id, first_name, last_name, email, password, phone_number)
-              VALUES ($1, $2, $3, $4, $5, $6)
+              INSERT INTO public.users (first_name, last_name, email, password, phone_number)
+              VALUES ($1, $2, $3, $4, $5)
             `;
-            const values = [id, first_name, last_name, email, hashed_password, phone_number];
+            const values = [first_name, last_name, email, hashed_password, phone_number];
             await client.query(query, values);
             await client.release();
 
@@ -52,7 +52,6 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
             req.session.user = {
                 email: email,
                 authenticated: true,
-                id: id.toString(),
                 userType: 'user'
             };
 
@@ -124,7 +123,6 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
                     req.session.user = {
                         email: req.body.email,
                         authenticated: true,
-                        id: user.id,
                         userType: 'user'
                     };
 
@@ -243,7 +241,7 @@ exports.deposit = async (req: Request, res: Response) => {
 
 
     // CHange account Num to session
-    const {accountNum, date, amount ,checkNum} = req.body;
+    const {date, amount ,checkNum} = req.body;
 
     // yyyy-mm-dd
     const formatted_date = moment(date, 'YYYY-MM-DD');
@@ -256,22 +254,25 @@ exports.deposit = async (req: Request, res: Response) => {
 
 
     // Create new deposit class
-    const ds = new Deposit(accountNum, formatted_date.toDate() ,clean_checkNum);
+    const email = req.session.user?.email || ""; // Use an empty string as the default value if email is undefined
+    const ds = new Deposit(email, formatted_date.toDate() ,clean_checkNum);
+
+    console.log(ds);
 
     const client = await pool.connect();
 
     const query = 'CALL createDeposit($1,$2,$3,$4)';
-    const values = [ds.getAccountNumber(), ds.getCheckNumber(), clean_amount,ds.getDate()];
+    const values = [ds.getEmail(), ds.getCheckNumber(), clean_amount,ds.getDate()];
 
     try {
         await client.query(query, values);
         await client.release();
 
-        logger.info('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + accountNum + '\n' + new Date().toISOString() + " Success");
+        logger.info('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Success");
         res.status(201).json({ message: 'Deposit created successfully' });
     } catch (error) {
         console.error('Error executing query:', error);
-        logger.error('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + accountNum + '\n' + new Date().toISOString() + " Failed");
+        logger.error('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Failed");
         res.status(500).json({ message: 'An error occurred' });
     }
 };
@@ -286,61 +287,27 @@ exports.withdraw = async (req: Request, res: Response) => {
         });
     }
 
-
-    // Acount num needs to be in the session
-    const {accountNum, amount} = req.body;
+    const email = req.session.user?.email || ""; // Use an empty string as the default value if email is undefined
+    const {amount} = req.body;
 
     const converted_amount = parseFloat(amount);
 
     const client = await pool.connect();
     const query = 'CALL createWithdraw($1,$2)';
 
-    const values = [accountNum, converted_amount];
+    const values = [email,converted_amount];
 
     try {
         await client.query(query, values);
         await client.release();
-        logger.info('POST /api/users/withdraw:  Withdraw:\n Amount: ' + converted_amount + '\n Account Number: ' + accountNum + '\n' + new Date().toISOString() + " Success");
+        logger.info('POST /api/users/withdraw:  Withdraw:\n Amount: ' + converted_amount + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Success");
         res.status(201).json({ message: 'Withdraw created successfully' });
     } catch (error) {
         console.error('Error executing query:', error);
-        logger.info('POST /api/users/withdraw:  Withdraw:\n Amount: ' + converted_amount + '\n Account Number: ' + accountNum + '\n' + new Date().toISOString() + " Failed");
+        logger.info('POST /api/users/withdraw:  Withdraw:\n Amount: ' + converted_amount + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Failed");
         res.status(500).json({ message: 'An error occurred' });
     }
 }
-
-exports.transfer = async (req: Request, res: Response) => {
-
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return res.render('status/status_400', {
-            message: "Invalid input"
-        });
-    }
-
-    const {accountNum, receiver, amount} = req.body;
-
-    const converted_amount = parseInt(amount);
-
-    const client = await pool.connect();
-    const query = 'CALL createTransfer($1,$2,$3)';
-
-    const values = [accountNum, receiver, converted_amount];
-
-    try {
-        await client.query(query, values);
-        await client.release();
-        logger.info('POST /api/users/transfer:  Transfer:\n Amount: ' + converted_amount + '\n Receiver: ' + receiver + '\n Account Number: ' + accountNum + '\n' + new Date().toISOString() + " Success");
-        res.status(201).json({ message: 'Transfer created successfully' });
-    } catch (error) {
-        console.error('Error executing query:', error);
-        logger.error('POST /api/users/transfer:  Transfer:\n Amount: ' + converted_amount + '\n Receiver: ' + receiver + '\n Account Number: ' + accountNum + '\n' + new Date().toISOString() + " Failed");
-        res.status(500).json({ message: 'An error occurred' });
-    }
-
-}
-
 
 
 exports.updateProfile = async (req: Request, res: Response) => {

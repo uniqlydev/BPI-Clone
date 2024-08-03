@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(newbody),
         })
-        
+
         .then(response => {
             if (!response.ok) {
                 throw new Error("There was an error");
@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             alert('User status changed')
+            window.location.href = '/admin/dashboard';
         })
         .catch(error => {
             console.error('Error:', error);

@@ -52,43 +52,39 @@ exports.login = (req: any, res: any) => {
     });
 };
 
-exports.createCheque = (req: any, res: any) => {
-    // Sanitize
+exports.createCheque = async (req: any, res: any) => {
+    // Sanitize input
     const errors = validationResult(req);
-
     if (!errors.isEmpty()) {
         return res.status(400).send("Invalid input");
     }
 
-    if (req.session.user === undefined || req.session.user.userType !== 'Admin') {
+    if (!req.session.user || req.session.user.userType !== 'Admin') {
         return res.status(403).send('Unauthorized');
     }
 
     const query = "INSERT INTO cheques (chequenum, amount, date) VALUES ($1, $2, $3)";
+    const { chequeNum, amount, date } = req.body;
+    const formattedDate = moment(date).format('YYYY-MM-DD');
 
-    const { chequeNum, amount, Date  } = req.body;
+    try {
+        const client = await pool.connect();
+        const values = [chequeNum, amount, formattedDate];
+        await client.query(query, values);
+        client.release();
 
-    const formattedDate = moment(Date).format('YYYY-MM-DD');
+        logger.info('Cheque created successfully', { endpoint: "POST /api/admin/createcheque", timestamp: Date.now() });
+        return res.status(201).json({ message: 'Cheque created successfully' });
+    } catch (err) {
+        console.error('An error has occurred', err);
+        logger.error('An error has occurred', { error: err, endpoint: "POST /api/admin/createcheque", timestamp: Date.now() });
 
-
-
-    pool.query (query, [chequeNum, amount, formattedDate], (err: string, result: { rows: any; }) => {
-        if (err) {
-            console.error('An error has occured', err);
-
-            logger.error('An error has occured', err , + "POST /api/admin/createCheque" + " - " + Date.now());
-
-            if (process.env.ENV === 'debug') {
-                return res.status(400).json({ error: err });
-            }else {
-                return res.status(400).json({ message: 'An error has occured' });
-            }
-
-        }else {
-            logger.info('Cheque created successfully', + "POST /api/admin/createCheque" + " - " + Date.now());
-            return res.status(201).json({ message: 'Cheque created successfully' });
+        if (process.env.ENV === 'debug') {
+            return res.status(400).json({ error: err });
+        } else {
+            return res.status(400).json({ message: 'An error has occurred' });
         }
-    });
+    }
 };
 
 exports.updateUserStatus = (req: any, res: any) => {
