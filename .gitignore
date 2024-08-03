@@ -28,7 +28,7 @@ package-lock.json
 
 # SSL Certificates
 server.key
-server.cert
+server.crt
 
 # Images
 images/*

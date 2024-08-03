@@ -15,7 +15,7 @@ import logger from './utils/Logger'
 
 // Loading SSL cert and key from dotenv
 const private_key = fs.readFileSync(path.resolve(__dirname, '../server.key'),'utf-8');
-const certificate = fs.readFileSync(path.resolve(__dirname, '../server.cert'), 'utf8');
+const certificate = fs.readFileSync(path.resolve(__dirname, '../server.crt'), 'utf8');
 
 
 // Set up SSL

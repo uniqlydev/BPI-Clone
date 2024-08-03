@@ -3,6 +3,7 @@ import Validator from '../utils/Validator';
 import pool from '../model/database';
 import Hash from '../utils/HashUtility';
 import moment from 'moment';
+import logger from '../utils/Logger';
 
 exports.login = (req: any, res: any) => {
     // Sanitize
@@ -12,15 +13,16 @@ exports.login = (req: any, res: any) => {
         return res.status(400).send("Invalid input");
     }
 
-    if (Validator.isEmail(req.body.email) === false) 
+    if (Validator.isEmail(req.body.email) === false)
         return res.status(400).send("Invalid email address");
 
     const query = "SELECT * FROM Users WHERE email = $1 AND role = 'superuser' LIMIT 1";
 
     pool.query(query, [req.body.email], async (err: string, result: { rows: any; }) => {
         if (err) {
-            console.error('Error executing query', err); 
-            return res.status(400).send(err); 
+            console.error('Error executing query', err);
+            logger.error('Error executing query', err , + "POST /api/admin/login" + " - " + Date.now());
+            return res.status(400).send(err);
         }
         if (result && result.rows && result.rows.length > 0) {
             const user = result.rows[0];
@@ -34,29 +36,24 @@ exports.login = (req: any, res: any) => {
                     id: user.id,
                     userType: 'Admin'
                 };
+
+                logger.info( req.session.user.email + ' logged in successfully', + "POST /api/admin/login" + " - " + Date.now());
                 return res.status(200).send('Logged in successfully');
             } else {
+                logger.error('Invalid credentials', + "POST /api/admin/login" + " - " + Date.now());
                 return res.status(400).send('Invalid credentials');
             }
         } else {
              // User is not an admin account
+
+            logger.error('User not found', + "POST /api/admin/login" + " - " + Date.now());
             return res.status(400).send('User not found.');
         }
     });
 };
 
-exports.logout = (req: any, res: any) => {
-    req.session.destroy((err: any) => {
-        if (err) {
-            return res.status(500).send('Internal Server Error');
-        }
-        res.status(200).send('Logged out successfully');
-    });
-};
-
-
 exports.createCheque = (req: any, res: any) => {
-    // Sanitize 
+    // Sanitize
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -73,18 +70,22 @@ exports.createCheque = (req: any, res: any) => {
 
     const formattedDate = moment(Date).format('YYYY-MM-DD');
 
-    
+
 
     pool.query (query, [chequeNum, amount, formattedDate], (err: string, result: { rows: any; }) => {
         if (err) {
             console.error('An error has occured', err);
+
+            logger.error('An error has occured', err , + "POST /api/admin/createCheque" + " - " + Date.now());
 
             if (process.env.ENV === 'debug') {
                 return res.status(400).json({ error: err });
             }else {
                 return res.status(400).json({ message: 'An error has occured' });
             }
+
         }else {
+            logger.info('Cheque created successfully', + "POST /api/admin/createCheque" + " - " + Date.now());
             return res.status(201).json({ message: 'Cheque created successfully' });
         }
     });
@@ -104,17 +105,20 @@ exports.updateUserStatus = (req: any, res: any) => {
 
     // Update query
     const query = `
-        UPDATE public.users 
-        SET first_name = $1, last_name = $2, is_active = $3 
+        UPDATE public.users
+        SET first_name = $1, last_name = $2, is_active = $3
         WHERE id = $4
     `;
 
     // Execute query with parameters
     pool.query(query, [first_name, last_name, status, userid], (error: any, results: any) => {
         if (error) {
+            logger.error('Error updating user', error , + "POST /api/admin/updateUserStatus" + " - " + Date.now());
             console.error("Error executing query", error);
             return res.status(500).json("Internal server error");
         }
+
+        logger.info('User updated successfully', + "POST /api/admin/updateUserStatus" + " - " + Date.now());
         res.status(200).json("User updated successfully");
     });
 };
