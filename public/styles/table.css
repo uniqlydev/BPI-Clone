@@ -4,33 +4,55 @@ body {
     align-items: center;
     height: 100vh; /* Ensure full viewport height */
     margin: 0;
-    background-color: #f0f0f0; /* Light background color */
+    background-color: var(--background-main); /* Use theme background color */
 }
+
 .container {
     width: 80%; /* Adjust width as needed */
     margin: auto; /* Center horizontally */
     padding: 20px;
-    background-color: white; /* White background for the container */
-    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Optional: Add shadow for depth */
+    background-color: var(--background-sidebar); /* Use theme sidebar color */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for depth */
     border-radius: 8px; /* Optional: Add rounded corners */
 }
+
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px; /* Add margin at the top */
 }
+
 th, td {
     padding: 10px;
     text-align: left;
     border-bottom: 1px solid #ddd; /* Optional: Add bottom border */
 }
+
 th {
-    background-color: #f2f2f2; /* Optional: Gray background for header */
+    background-color: var(--inputbox); /* Use theme input box color */
+    color: var(--bpi-red); /* Use theme primary color for text */
 }
+
+td {
+    background-color: var(--background-main); /* Use theme background color for rows */
+}
+
 form {
     display: flex;
     align-items: center;
 }
+
 button {
-    margin-left: 10px; /* Optional: Adjust button placement */
+    margin-left: 10px; /* Adjust button placement */
+    background-color: var(--button-primary); /* Use theme button color */
+    color: white; /* Ensure text is readable */
+    border: none; /* Remove default border */
+    padding: 10px 15px; /* Add padding for button */
+    border-radius: 5px; /* Optional: Add rounded corners */
+    cursor: pointer; /* Change cursor to pointer */
+}
+
+button:disabled {
+    background-color: var(--button-disabled); /* Use theme disabled button color */
+    cursor: not-allowed; /* Change cursor to not-allowed for disabled button */
 }

@@ -21,18 +21,20 @@
         <% users.forEach(user => { %>
             <tr>
                 <td><%= user.id %></td>
-                <td><%= user.first_name %></td>
-                <td><%= user.last_name %></td>
                 <td>
-                    <form class="update-form" method="put" action="">
-                        <input type="hidden" name="id" value="<%= user.id %>">
-                        <select name="status">
+                    <form class="update-form" method="post" action="">
+                        <input type="hidden" name="id" id="userid" value="<%= user.id %>">
+                        <input type="text" name="first_name" id="first_name" value="<%= user.first_name %>">
+                        <input type="text" name="last_name" id="last_name" value="<%= user.last_name %>">
+                        <select name="status" id="status">
                             <option value="active" <%= user.is_active ? 'selected' : '' %>>Active</option>
                             <option value="inactive" <%= !user.is_active ? 'selected' : '' %>>Inactive</option>
                         </select>
-                        <button type="submit">Update</button>
+                        <button type="button" id="submit">Update</button>
                     </form>
                 </td>
             </tr>
         <% }) %>
     </table>
+</body>
+</html>

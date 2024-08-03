@@ -9,6 +9,7 @@ import rate_limiter from 'express-rate-limit'
 import morgan from 'morgan'
 import pool from './model/database'
 import User from './model/User'
+import logger from './utils/Logger'
 
 
 
@@ -49,7 +50,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 
 try {
-  // User 
+  // User
   app.use(session({
     secret: process.env.SESSION_SECRET || require('crypto').randomBytes(16).toString('hex'),
     resave: false,
@@ -65,8 +66,6 @@ try {
   throw new Error('Failed to set up session');
 }
 
-
-
 app.use('/api', apiLimiter);
 
 // Routes
@@ -80,7 +79,7 @@ app.get('/', async (req: any, res: { render: (arg0: string) => void }) => {
 
   if (req.session.user === undefined) {
     res.render('index');
-  }else if (req.session.admin_authenticated === true) {
+  }else if (req.session.user.userType === 'Admin') {
     // Redirect to admin dashboard
     res.render('admin_dashboard');
   }else {
@@ -94,66 +93,40 @@ app.get('/register', (req: any, res: { render: (arg0: string) => void }) => {
 });
 
 
-app.get('/admin', (req: any, res: { render: (arg0: string) => void }) => {
-  const adminSession = req.session;
-
-  res.render('admin_login');
+app.get('/admin', (req, res) => {
+  if (req.session.user !== undefined && req.session.user.userType !== 'Admin') {
+    res.render('status/status_403', { message: 'Unauthorized' });
+  }else if (req.session.user !== undefined && req.session.user.userType === 'Admin') {
+    res.render('admin_dashboard');
+  }else {
+    res.render('admin_login');
+  }
 });
 
 app.get('/admin/dashboard', (req: any, res) => {
 
-  if (req.session.user !== undefined) {
-    res.render('status/status_403')
+  console.log('Session:', req.session);
+  if (req.session.user === undefined || req.session.user.userType !== 'Admin') {
+    return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
-  if (req.session.admin_authenticated !== true) {
-    res.render('status/status_403')
-  }
-
-  if (req.session.admin === undefined) {
-    res.render('status/status_403')
-  }
-  
   res.render('admin_dashboard');
 });
 
+
 app.get('/admin/createcheque', (req: any, res) => {
-  const adminSession = req.session;
-
-  console.log('Admin session:', adminSession);
-
-  if (req.session.user !== undefined) {
-    res.render('status/status_403')
+  if (req.session.user === undefined || req.session.user.userType !== 'Admin') {
+    return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
-  if (req.session.admin_authenticated !== true) {
-    res.render('status/status_403')
-  }
-
-  if (req.session.admin === undefined) {
-    res.render('status/status_403')
-  }
-  
   res.render('admin_cheque');
 });
 
 
 
 app.get('/admin/users', (req: any, res) => {
-  const adminSession = req.session;
-
-  console.log('Admin session:', adminSession);
-
-  if (req.session.user !== undefined) {
-    res.render('status/status_403', { message: 'Unauthorized' });
-  }
-
-  if (req.session.admin_authenticated !== true) {
-    res.render('status/status_403', { message: 'Unauthorized' });
-  }
-
-  if (req.session.admin === undefined) {
-    res.render('status/status_403', { message: 'Unauthorized' });
+  if (req.session.user === undefined || req.session.user.userType !== 'Admin') {
+    return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
   const query = "SELECT id, first_name, last_name, is_active FROM users WHERE role='user'"
@@ -177,9 +150,9 @@ app.get('/admin/users', (req: any, res) => {
 });
 
 
-app.get('/transfer', (req, res) => {
+app.get('/transfer', (req: any, res) => {
 
-  if (req.session.user === undefined) {
+  if (req.session.user === undefined || req.session.user.userType === 'Admin') {
     return res.render('status/status_403', {message: "Unforbidden access."});
   }else {
     res.render('function_transfer');
@@ -187,43 +160,33 @@ app.get('/transfer', (req, res) => {
 
 });
 
-app.get('/withdraw', (req, res) => {
+app.get('/withdraw', (req: any, res) => {
 
-  if (req.session.user === undefined) {
+  if (req.session.user === undefined || req.session.user.userType === 'Admin') {
     return res.render('status/status_403', {message: "Unforbidden access."});
   }else res.render('function_withdraw');
 });
 
-app.get('/deposit', (req, res) => {
+app.get('/deposit', (req: any, res) => {
 
-  if (req.session.user === undefined) {
+  if (req.session.user === undefined || req.session.user.userType === 'Admin') {
     return res.render('status/status_403', {message: "Unforbidden access."});
   }else res.render('function_deposit');
 });
 
 
-app.get('/profilepicture', (req,res) => {
+app.get('/profilepicture', (req: any,res) => {
 
-  if (req.session.user === undefined) {
+  if (req.session.user === undefined || req.session.user.userType === 'Admin') {
     return res.render('status/status_403', {message: "Unforbidden access."});
   }else res.render('upload');
 });
 
-app.get('/logout', (req: any, res: { render: (arg0: string) => void }) => {
-  req.session.destroy((err: any) => {
-    if (err) {
-      console.error('Error destroying session:', err);
-    }
-    res.render('index');
-  });
-});
-
-
-app.get('/profile', async (req,res) => {
-      if (!req.session?.user?.authenticated) {
+app.get('/profile', async (req: any,res) => {
+    if (req.session.user === undefined || req.session.user.userType === 'Admin') {
         return res.render('status/status_403', {
-            message: "Unforbidden access."
-        });
+            message: 'Unauthorized'
+        })
     }
 
     const query = 'SELECT * FROM public.users WHERE email = $1';
@@ -249,11 +212,27 @@ app.get('/profile', async (req,res) => {
     }
 });
 
+app.get('/logout', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.render('status/status_403', {
+            message: 'Unauthorized'
+        });
+    } else {
+
+        logger.info(`${req.session.user.email} logged out at ${new Date()}`);
+        req.session.destroy((err: Error) => {
+            if (err) {
+                logger.error('Error destroying session:', err);
+            }
+        });
+
+        res.render('index');
+    }
+});
+
 
 const httpsServer = https.createServer(server_credentials,app);
 
 httpsServer.listen(443, () => {
   console.log('HTTPS Server running on port 443');
 });
-
-

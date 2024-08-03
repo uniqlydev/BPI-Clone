@@ -26,18 +26,15 @@ exports.login = (req: any, res: any) => {
             const user = result.rows[0];
             const hasher = new Hash();
             const isValid = await hasher.comparePassword(req.body.password, user.password);
-            // Remove user: { email: 'bomber8183@gmail.com', authenticated: true }, from session
             req.session.user = undefined;
             if (isValid) {
-                req.session.admin_authenticated = true;
-                req.session.admin = user;
-                req.session.save((err: any) => {
-                    if (err) {
-                        
-                        return res.status(500).send('Internal Server Error');
-                    }
-                    res.status(201).json({ message: 'Login successful' });
-                });
+                req.session.user = {
+                    email: user.email,
+                    authenticated: true,
+                    id: user.id,
+                    userType: 'Admin'
+                };
+                return res.status(200).send('Logged in successfully');
             } else {
                 return res.status(400).send('Invalid credentials');
             }
@@ -64,6 +61,10 @@ exports.createCheque = (req: any, res: any) => {
 
     if (!errors.isEmpty()) {
         return res.status(400).send("Invalid input");
+    }
+
+    if (req.session.user === undefined || req.session.user.userType !== 'Admin') {
+        return res.status(403).send('Unauthorized');
     }
 
     const query = "INSERT INTO cheques (chequenum, amount, date) VALUES ($1, $2, $3)";
@@ -97,32 +98,23 @@ exports.updateUserStatus = (req: any, res: any) => {
         return res.status(400).send("Invalid input");
     }
 
-    const query = "UPDATE public.users SET is_active = $1 WHERE id = $2";
-
-    let { status, id } = req.body;
-
-    console.log("HELLO WORLD");
-
-    return res.status(201).json({ message: req.body });
+    // Extract data from request
+    const { first_name, last_name, status, userid } = req.body;
 
 
-    // if (status === 'active') {
-    //     status = true
-    // }else if (status === 'inactive') status = false;
+    // Update query
+    const query = `
+        UPDATE public.users 
+        SET first_name = $1, last_name = $2, is_active = $3 
+        WHERE id = $4
+    `;
 
-    // console.log(req.body.status);
-
-    // pool.query(query, [status, id], (err: string, result: { rows: any; }) => {
-    //     if (err) {
-    //         console.error('An error has occured', err);
-
-    //         if (process.env.ENV === 'debug') {
-    //             return res.status(400).json({ error: err });
-    //         }else {
-    //             return res.status(400).json({ message: 'An error has occured' });
-    //         }
-    //     }else {
-    //         return res.status(201).json({ message: 'User status updated successfully' });
-    //     }
-    // });
+    // Execute query with parameters
+    pool.query(query, [first_name, last_name, status, userid], (error: any, results: any) => {
+        if (error) {
+            console.error("Error executing query", error);
+            return res.status(500).json("Internal server error");
+        }
+        res.status(200).json("User updated successfully");
+    });
 };

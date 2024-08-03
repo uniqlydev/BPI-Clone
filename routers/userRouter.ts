@@ -25,11 +25,10 @@ const imageUpload = multer({
     },
 });
 
-// Authorization 
+// Authorization
 router.post('/register', UserController.register);
 router.post('/login', UserController.login)
 router.post('/img', imageUpload.single('image'), UserController.uploadImage);
-router.post('/logout', UserController.logout)
 router.post('/deposit', UserController.deposit);
 router.post('/withdraw', UserController.withdraw);
 router.post('/transfer', UserController.transfer);

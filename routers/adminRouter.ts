@@ -6,6 +6,6 @@ const adminController = require('../controllers/adminController')
 router.post('/login', adminController.login)
 router.post('/logout', adminController.logout)
 router.post('/createcheque', adminController.createCheque)
-router.put('/updateuser', adminController.updateUserStatus)
+router.post('/updateuser', adminController.updateUserStatus)
 
 module.exports = router
