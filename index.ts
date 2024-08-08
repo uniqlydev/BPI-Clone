@@ -230,6 +230,69 @@ app.get('/logout', (req, res) => {
     }
 });
 
+app.get('/transactions', async (req, res) => {
+    // Check if the user is authenticated and is not an Admin
+    if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin') {
+        logger.error('GET /transactions: Unauthorized access attempt');
+        return res.render('status/status_403', {
+            message: 'Unauthorized'
+        });
+    }
+
+    // Get a connection from the pool
+    const client = await pool.connect();
+
+    const query = `
+        SELECT
+            CASE
+                WHEN x.type = 'D' THEN t.amountdeposited
+                ELSE 0
+            END AS amountdeposited,
+            CASE
+                WHEN x.type = 'W' THEN w.amountwithdrawn
+                ELSE 0
+            END AS amountwithdrawn,
+            t.chequenum,
+            x.type
+        FROM
+            deposits t
+            JOIN withdraw w ON t.accountnumber = w.accountnumber
+            JOIN transactions x ON t.accountnumber = x.accountnumber
+            INNER JOIN users a ON t.accountnumber = a.id
+        WHERE
+            a.email = $1
+        ORDER BY
+            x.type;
+    `;
+
+
+    try {
+        // Execute the query with the user's email
+        const result = await client.query(query, [req.session.user.email]);
+
+        if (result.rows.length > 0) {
+            // Render the transactions page with the retrieved data
+            res.render('transactions', {
+                transactions: result.rows
+            });
+        } else {
+            // Render the transactions page with an empty array if no transactions found
+            res.render('transactions', {
+                transactions: []
+            });
+        }
+    } catch (err) {
+        // Log the error and return a 500 status
+        logger.error(`GET /transactions: Error retrieving transactions - ${err}`);
+        res.status(500).json({ message: "An error occurred while retrieving transactions" });
+    } finally {
+        // Release the client back to the pool
+        client.release();
+    }
+});
+
+
+
 
 const httpsServer = https.createServer(server_credentials,app);
 

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../styles/fonts.css">
     <link rel="stylesheet" href="../styles/transfer.css">
     <link rel="stylesheet" href="../styles/table.css">
-    <script src="../scripts/admin_updateuser.js"></script>
+    <script src="../scripts/admin_updateuser.js" defer></script>
 </head>
 <body>
     <div class="container">
@@ -32,12 +32,11 @@
                             <input type="text" name="last_name" id="last_name_<%= user.id %>" value="<%= user.last_name %>">
                         </td>
                         <td>
-                                <select name="status" id="status_<%= user.id %>">
-                                    <option value="active" <%= user.is_active ? 'selected' : '' %>>Active</option>
-                                    <option value="inactive" <%= !user.is_active ? 'selected' : '' %>>Inactive</option>
-                                </select>
+                            <select name="status" id="status_<%= user.id %>">
+                                <option value="active" <%= user.is_active ? 'selected' : '' %>>Active</option>
+                                <option value="inactive" <%= !user.is_active ? 'selected' : '' %>>Inactive</option>
+                            </select>
                         </td>
-
                         <td>
                             <button type="button" class="submit-btn" data-user-id="<%= user.id %>">Update</button>
                         </td>

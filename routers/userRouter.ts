@@ -6,6 +6,7 @@ const router = express.Router()
 const UserController = require('../controllers/UserController')
 
 import multer from 'multer';
+import { isAuthenticatedUser } from '../middleware/authenticator';
 
 const storage = multer.memoryStorage();
 const imageUpload = multer({
@@ -28,9 +29,10 @@ const imageUpload = multer({
 // Authorization
 router.post('/register', UserController.register);
 router.post('/login', UserController.login)
-router.post('/img', imageUpload.single('image'), UserController.uploadImage);
-router.post('/deposit', UserController.deposit);
-router.post('/withdraw', UserController.withdraw);
-router.post('/profile/update', UserController.updateProfile);
+
+router.post('/img', isAuthenticatedUser ,imageUpload.single('image'), UserController.uploadImage);
+router.post('/deposit', isAuthenticatedUser ,UserController.deposit);
+router.post('/withdraw', isAuthenticatedUser ,UserController.withdraw);
+router.post('/profile/update', isAuthenticatedUser, UserController.updateProfile);
 
 module.exports = router

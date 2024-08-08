@@ -1,0 +1,57 @@
+body {
+    font-family: var(--font-body);
+    background-color: var(--background-main);
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: var(--background-sidebar);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-family: var(--logo-font);
+    color: var(--bpi-red);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    font-family: var(--font-body);
+}
+
+th {
+    background-color: var(--bpi-red);
+    color: #ffffff;
+}
+
+tr:nth-child(even) {
+    background-color: var(--inputbox);
+}
+
+.message {
+    background-color: #ffdddd;
+    border-left: 6px solid #f44336;
+    padding: 10px;
+    font-family: var(--font-body);
+    margin-bottom: 20px;
+    text-align: center;
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions</title>
+    <link rel="stylesheet" href="styles/colors.css">
+    <link rel="stylesheet" href="styles/fonts.css">
+    <link rel="stylesheet" href="styles/navbar.css">
+    <link rel="stylesheet" href="styles/transactions.css">
+</head>
+<body>
+    <%- include ('navbar') %>
+    <div class="container">
+        <h1>Transactions</h1>
+
+        <% if (transactions.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Amount Deposited</th>
+                        <th>Amount Withdrawn</th>
+                        <th>Cheque Number</th>
+                        <th>type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% transactions.forEach(function(transaction) { %>
+                        <tr>
+                            <td><%= transaction.amountdeposited %></td>
+                            <td><%= transaction.amountwithdrawn %></td>
+                            <td><%= transaction.chequenum %></td>
+                            <td><%= transaction.type%></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <div class="message">
+                <p>No transactions found.</p>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -11,7 +11,7 @@ class InputCleaner {
     }
 
     static cleanPassword(password: string) {
-        const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+        const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*_])[A-Za-z\d@$!%*_]{8,16}$/;
 
         if (re.test(password)) {
             return password;
@@ -50,10 +50,37 @@ class InputCleaner {
         }
     }
 
-    static cleanUpdateUser() {}
 
+    static cleanMoney(money: Number) {
+        const re = /^[0-9]+(\.[0-9]{1,2})?$/;
 
+        if (re.test(money.toString())) {
+            return parseFloat(money.toString()); // Ensuring the money is returned as a number
+        } else {
+            return null;
+        }
+    }
 
+    static cleanChequeNumber(chequeNumber: Number) {
+        const re = /^[0-9]+$/;
 
+        if (re.test(chequeNumber.toString())) {
+            return parseInt(chequeNumber.toString()); // Ensuring the cheque number is returned as a number
+        } else {
+            return null;
+        }
+    }
+
+    static cleanStatus(status: string) {
+        const re = /^(true|false)$/;
+
+        if (re.test(status)) {
+            return status;
+        } else {
+            return null;
+        }
+    }
 
 }
+
+export default InputCleaner;

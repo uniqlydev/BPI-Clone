@@ -33,4 +33,4 @@ server.crt
 # Images
 images/*
 
-# Ignore all js files except public
+.env.prod

@@ -1,34 +1,40 @@
-import { body, validationResult } from 'express-validator';
+import { validationResult } from 'express-validator';
 import Validator from '../utils/Validator';
 import pool from '../model/database';
 import Hash from '../utils/HashUtility';
 import moment from 'moment';
 import logger from '../utils/Logger';
+import InputCleaner from '../utils/InputCleaner';
 
 exports.login = (req: any, res: any) => {
+    logger.info('POST /api/admin/login: Request received at ' + new Date().toISOString());
+
     // Sanitize
     const errors = validationResult(req);
-
     if (!errors.isEmpty()) {
+        logger.warn('POST /api/admin/login: Validation errors - ' + JSON.stringify(errors.array()));
         return res.status(400).send("Invalid input");
     }
 
-    if (Validator.isEmail(req.body.email) === false)
+    if (!Validator.isEmail(req.body.email)) {
+        logger.warn('POST /api/admin/login: Invalid email address - ' + req.body.email);
         return res.status(400).send("Invalid email address");
+    }
 
     const query = "SELECT * FROM Users WHERE email = $1 AND role = 'superuser' LIMIT 1";
 
     pool.query(query, [req.body.email], async (err: string, result: { rows: any; }) => {
         if (err) {
-            console.error('Error executing query', err);
-            logger.error('Error executing query', err , + "POST /api/admin/login" + " - " + Date.now());
+            logger.error('POST /api/admin/login: Error executing query - ' + err);
             return res.status(400).send(err);
         }
+
         if (result && result.rows && result.rows.length > 0) {
             const user = result.rows[0];
             const hasher = new Hash();
             const isValid = await hasher.comparePassword(req.body.password, user.password);
             req.session.user = undefined;
+
             if (isValid) {
                 req.session.user = {
                     email: user.email,
@@ -37,29 +43,31 @@ exports.login = (req: any, res: any) => {
                     userType: 'Admin'
                 };
 
-                logger.info( req.session.user.email + ' logged in successfully', + "POST /api/admin/login" + " - " + Date.now());
+                logger.info('POST /api/admin/login: ' + req.session.user.email + ' logged in successfully');
                 return res.status(200).send('Logged in successfully');
             } else {
-                logger.error('Invalid credentials', + "POST /api/admin/login" + " - " + Date.now());
+                logger.error('POST /api/admin/login: Invalid credentials for email - ' + req.body.email);
                 return res.status(400).send('Invalid credentials');
             }
         } else {
-             // User is not an admin account
-
-            logger.error('User not found', + "POST /api/admin/login" + " - " + Date.now());
+            logger.error('POST /api/admin/login: User not found for email - ' + req.body.email);
             return res.status(400).send('User not found.');
         }
     });
 };
 
 exports.createCheque = async (req: any, res: any) => {
+    logger.info('POST /api/admin/createcheque: Request received at ' + new Date().toISOString());
+
     // Sanitize input
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+        logger.warn('POST /api/admin/createcheque: Validation errors - ' + JSON.stringify(errors.array()));
         return res.status(400).send("Invalid input");
     }
 
     if (!req.session.user || req.session.user.userType !== 'Admin') {
+        logger.warn('POST /api/admin/createcheque: Unauthorized access attempt');
         return res.status(403).send('Unauthorized');
     }
 
@@ -69,16 +77,14 @@ exports.createCheque = async (req: any, res: any) => {
 
     try {
         const client = await pool.connect();
-        const values = [chequeNum, amount, formattedDate];
+        const values = [parseInt(chequeNum), parseFloat(amount), formattedDate];
         await client.query(query, values);
         client.release();
 
-        logger.info('Cheque created successfully', { endpoint: "POST /api/admin/createcheque", timestamp: Date.now() });
+        logger.info('POST /api/admin/createcheque: Cheque created successfully - chequeNum: ' + chequeNum);
         return res.status(201).json({ message: 'Cheque created successfully' });
     } catch (err) {
-        console.error('An error has occurred', err);
-        logger.error('An error has occurred', { error: err, endpoint: "POST /api/admin/createcheque", timestamp: Date.now() });
-
+        logger.error('POST /api/admin/createcheque: An error has occurred - ' + err);
         if (process.env.ENV === 'debug') {
             return res.status(400).json({ error: err });
         } else {
@@ -88,16 +94,17 @@ exports.createCheque = async (req: any, res: any) => {
 };
 
 exports.updateUserStatus = (req: any, res: any) => {
+    logger.info('POST /api/admin/updateUserStatus: Request received at ' + new Date().toISOString());
+
     // Sanitize
     const errors = validationResult(req);
-
     if (!errors.isEmpty()) {
+        logger.warn('POST /api/admin/updateUserStatus: Validation errors - ' + JSON.stringify(errors.array()));
         return res.status(400).send("Invalid input");
     }
 
     // Extract data from request
     const { first_name, last_name, status, userid } = req.body;
-
 
     // Update query
     const query = `
@@ -107,14 +114,18 @@ exports.updateUserStatus = (req: any, res: any) => {
     `;
 
     // Execute query with parameters
-    pool.query(query, [first_name, last_name, status, userid], (error: any, results: any) => {
+    pool.query(query, [InputCleaner.cleanName(first_name), InputCleaner.cleanName(last_name), InputCleaner.cleanStatus(status), userid], (error: any, results: any) => {
+        console.log(InputCleaner.cleanName(first_name));
+        console.log(InputCleaner.cleanName(last_name));
+        console.log(InputCleaner.cleanStatus(status));
+        console.log(InputCleaner.cleanEmail(userid));
         if (error) {
-            logger.error('Error updating user', error , + "POST /api/admin/updateUserStatus" + " - " + Date.now());
+            logger.error('POST /api/admin/updateUserStatus: Error updating user - ' + error.message);
             console.error("Error executing query", error);
             return res.status(500).json("Internal server error");
         }
 
-        logger.info('User updated successfully', + "POST /api/admin/updateUserStatus" + " - " + Date.now());
+        logger.info('POST /api/admin/updateUserStatus: User updated successfully - userid: ' + userid);
         res.status(200).json("User updated successfully");
     });
 };

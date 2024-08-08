@@ -1,7 +1,6 @@
 import path from 'path'
 import fs from 'fs';
 import pool from '../model/database';
-import IDGenerator from '../utils/IDGenerator';
 import Hash from '../utils/HashUtility';
 import Validator from '../utils/Validator';
 import {validationResult} from 'express-validator';
@@ -11,12 +10,19 @@ import { Request, Response } from 'express';
 import Deposit from '../model/deposit';
 import moment from 'moment';
 import logger from '../utils/Logger';
+import InputCleaner from '../utils/InputCleaner';
 
 
 
-exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) => {
-    json(arg0: { message: string; }): unknown; (): any; new(): any; send: { (arg0: string): any; new(): any; };
-}; }) => {
+
+
+// Load dotenv
+require('dotenv').config();
+exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) => { json(arg0: { message: string; }): unknown; (): any; new(): any; send: { (arg0: string): any; new(): any; };}; }) => {
+    if (req.session?.user?.userType === 'Admin') {
+        logger.error('POST /api/users/register:  Admin tried to register' + new Date().toISOString() + " Failed");
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -24,19 +30,27 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
     }
 
     const hasher = new Hash();
-    const idGen = new IDGenerator();
     const { first_name, last_name, email, password, phone_number, confirm_password } = req.body;
+
 
     // Check if the password and confirm password match
     if (password !== confirm_password) {
+        logger.error('POST /api/users/register:  Passwords do not match' + new Date().toISOString() + " Failed");
         return res.status(400).send('Passwords do not match.');
     }
 
-
     try {
-        const hashed_password = await hasher.hashPassword(password);
+        const cleaned_password = InputCleaner.cleanPassword(password) || '';
+        const hashed_password = await hasher.hashPassword(cleaned_password);
 
-        const id = idGen.generateID();
+                // Another layer of protection
+        const cleaned = [
+            InputCleaner.cleanName(first_name),
+            InputCleaner.cleanName(last_name),
+            InputCleaner.cleanEmail(email),
+            hashed_password,
+            InputCleaner.cleanPhone(phone_number),
+        ];
 
         try {
             const client = await pool.connect();
@@ -44,8 +58,7 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
               INSERT INTO public.users (first_name, last_name, email, password, phone_number)
               VALUES ($1, $2, $3, $4, $5)
             `;
-            const values = [first_name, last_name, email, hashed_password, phone_number];
-            await client.query(query, values);
+            await client.query(query, cleaned);
             await client.release();
 
             // Put in session
@@ -55,81 +68,99 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
                 userType: 'user'
             };
 
-            logger.info('POST /api/users/register:  Register: ' + new Date().toISOString());
+            logger.info('POST /api/users/register:  User Reigstered Successfully: ' + new Date().toISOString());
 
             res.status(201).json({ message: 'User created successfully' });
           } catch (error) {
-            console.error('Error executing query:', error);
+            logger.error('POST /api/users/register:  User Reigstration Failed: ' + new Date().toISOString());
 
             if (process.env.ENV === 'debug') {
-                res.status(500).json({
-                    message: 'An error occurred:' + error,
-                })
-            }else {
-                res.status(500).json({ message: 'An error occurred' });
+                console.error("Error: ", error);
             }
+
+            return res.status(500).json({ message: 'An error occurred' });
         }
-    }catch(err){
-        console.error('Error executing query', err); // Log the error for debugging
+
+    } catch(err){
+
+        logger.error('POST /api/users/register:  User Reigstration Failed: ' + new Date().toISOString());
 
         if (process.env.ENV === 'debug') {
-            res.status(500).json({
-                message: 'An error occured: ' + err
-            })
+            console.error("Error: ", err);
         }
 
-        return res.status
+        return res.status(500).json({ message: 'An error occurred' });
     }
 };
 
 
 exports.login = (req: LoginRequest & Request, res: Response) => {
 
+    if (req.session?.user?.userType === 'Admin') {
+        logger.error('POST /api/users/register:  Admin tried to Login' + new Date().toISOString() + " Failed");
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
+
     // Sanitize
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
+        console.log('Nandito')
+        logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
         return res.status(400).send("Invalid input");
     }
 
-    if (Validator.isEmail(req.body.email) === false)
+    if (Validator.isEmail(req.body.email) === false) {
+        console.log('Nandito1')
+        logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
         return res.status(400).send("Invalid email address");
+    }
 
     // Retrieve the user with the email and password
     const userQuery = "SELECT id, password FROM public.users WHERE email = $1 AND role = 'user' LIMIT 1;";
-    const values = [req.body.email];
+    const values = [InputCleaner.cleanEmail(req.body.email)];
+
+    if (values[0] === '') {
+        logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
+        return res.status(400).send('Invalid email address');
+    }
 
     pool.query(userQuery, values, async (err: string, result: { rows: any[]; }) => {
         if (err) {
-            console.error('Error executing query', err); // Log the error for debugging
+            if (process.env.ENV === 'debug') {
+                console.error(err);
+            }
+            logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
             return res.status(400).send(err); // Send the error in the response
         }
         if (result && result.rows && result.rows.length > 0) {
             const user = result.rows[0];
             const hashedPassword = user.password;
             const hasher = new Hash();
-            const isMatch = await hasher.comparePassword(req.body.password, hashedPassword);
+            const cleanedPassword = InputCleaner.cleanPassword(req.body.password) || '';
+
+            console.log(cleanedPassword);
+
+            if (cleanedPassword === '') {
+                logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
+                return res.status(400).send('Invalid password');
+            }
+
+
+            const isMatch = await hasher.comparePassword(cleanedPassword, hashedPassword);
             if (isMatch) {
+
                 // Audit logging
-                const auditQuery = "INSERT INTO audit_activity VALUES ($1, 'SUCCESS', 'User logged in', NOW());";
-                const auditValues = [user.id];
+                logger.info('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Success");
 
-                pool.query(auditQuery, auditValues, (auditErr: string) => {
-                    if (auditErr) {
-                        console.error('Error logging audit activity', auditErr);
-                        // Log error but continue with login success
-                    }
-                    // Refresh the session
-                    req.session.user = {
-                        email: req.body.email,
-                        authenticated: true,
-                        userType: 'user'
-                    };
+                req.session.user = {
+                    email: req.body.email,
+                    authenticated: true,
+                    userType: 'user'
+                };
 
-                    logger.info('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Success");
+                return res.status(200).json({ message: 'Logged in successfully' });
 
-                    return res.status(200).json({ message: 'Login successful' });
-                });
             } else {
 
                 // Audit logging
@@ -148,7 +179,6 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
         } else {
             logger.info('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
             return res.status(400).json({ message: 'Invalid email or password' });
-
         }
     });
 
@@ -156,10 +186,10 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
 
 exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: Response) => {
     // Check if user is authenticated
-    if (!req.session?.user?.authenticated) {
+    if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin') {
+        logger.error('POST /api/users/deposit:  Unauthorized access attempt');
         return res.status(401).json({ message: "Unauthorized" });
     }
-
     if (!req.file?.buffer) {
         return res.status(400).json({ message: "No file uploaded" });
     }
@@ -222,7 +252,11 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
 
         logger.error('POST /api/users/uploadImage:  Image uploaded  ' + new Date().toISOString() + " Failed");
 
-        console.error('Error updating profile picture:', error);
+        if (process.env.ENV === 'debug') {
+            console.error("Error: ", error);
+        }
+
+        console.error('Error updating profile picture');
         return res.status(500).json({ message: 'An error occurred' });
     }
 
@@ -231,6 +265,12 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
 
 
 exports.deposit = async (req: Request, res: Response) => {
+
+    if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin') {
+        logger.error('POST /api/users/deposit:  Unauthorized access attempt');
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -247,17 +287,20 @@ exports.deposit = async (req: Request, res: Response) => {
     const formatted_date = moment(date, 'YYYY-MM-DD');
 
     // convert checnum to int
-    const clean_checkNum = parseInt(checkNum);
+    const clean_checkNum = InputCleaner.cleanChequeNumber(checkNum);
 
     // Convert amount to double
-    const clean_amount = parseFloat(amount);
+    const clean_amount = InputCleaner.cleanMoney(amount);
 
 
     // Create new deposit class
     const email = req.session.user?.email || ""; // Use an empty string as the default value if email is undefined
-    const ds = new Deposit(email, formatted_date.toDate() ,clean_checkNum);
+    const ds = new Deposit(email, formatted_date.toDate() ,clean_checkNum || 0);
 
-    console.log(ds);
+    if (clean_amount === 0) {
+        logger.error('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Failed");
+        return res.status(400).json({ message: 'Invalid amount' });
+    }
 
     const client = await pool.connect();
 
@@ -271,13 +314,22 @@ exports.deposit = async (req: Request, res: Response) => {
         logger.info('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Success");
         res.status(201).json({ message: 'Deposit created successfully' });
     } catch (error) {
-        console.error('Error executing query:', error);
+
+        if (process.env.ENV === 'debug') {
+            console.error('Error executing query:', error);
+        }
+
         logger.error('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Failed");
         res.status(500).json({ message: 'An error occurred' });
     }
 };
 
 exports.withdraw = async (req: Request, res: Response) => {
+
+    if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin') {
+        logger.error('POST /api/users/deposit:  Unauthorized access attempt');
+        return res.status(401).json({ message: "Unauthorized" });
+    }
 
     const errors = validationResult(req);
 
@@ -290,7 +342,7 @@ exports.withdraw = async (req: Request, res: Response) => {
     const email = req.session.user?.email || ""; // Use an empty string as the default value if email is undefined
     const {amount} = req.body;
 
-    const converted_amount = parseFloat(amount);
+    const converted_amount = InputCleaner.cleanMoney(amount);
 
     const client = await pool.connect();
     const query = 'CALL createWithdraw($1,$2)';
@@ -301,9 +353,14 @@ exports.withdraw = async (req: Request, res: Response) => {
         await client.query(query, values);
         await client.release();
         logger.info('POST /api/users/withdraw:  Withdraw:\n Amount: ' + converted_amount + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Success");
+
         res.status(201).json({ message: 'Withdraw created successfully' });
     } catch (error) {
-        console.error('Error executing query:', error);
+
+        if (process.env.ENV === 'debug') {
+            console.error('Error executing query:', error);
+        }
+
         logger.info('POST /api/users/withdraw:  Withdraw:\n Amount: ' + converted_amount + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Failed");
         res.status(500).json({ message: 'An error occurred' });
     }
@@ -312,12 +369,10 @@ exports.withdraw = async (req: Request, res: Response) => {
 
 exports.updateProfile = async (req: Request, res: Response) => {
 
-    if (!req.session?.user?.authenticated) {
-        return res.render('status/status_403', {
-            message: "Unforbidden access."
-        });
+    if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin') {
+        logger.error('POST /api/users/deposit:  Unauthorized access attempt');
+        return res.status(401).json({ message: "Unauthorized" });
     }
-
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -329,14 +384,19 @@ exports.updateProfile = async (req: Request, res: Response) => {
     const { firstName, lastName, phoneNumber } = req.body;
 
     const query = 'UPDATE public.users SET first_name = $1, last_name = $2, phone_number = $3 WHERE email = $4';
-    const values = [firstName, lastName, phoneNumber, req.session.user.email];
+    const values = [InputCleaner.cleanName(firstName), InputCleaner.cleanName(lastName), InputCleaner.cleanChequeNumber(phoneNumber), InputCleaner.cleanEmail(req.session.user.email)];
 
     try {
         await pool.query(query, values);
         logger.info('POST /api/users/updateProfile:  Profile Update:\n First Name: ' + firstName + '\n Last Name: ' + lastName + '\n Phone Number: ' + phoneNumber + '\n' + new Date().toISOString() + " Success");
         return res.render('status/status_200.ejs')
     } catch (error) {
-        console.error('Error executing query:', error);
+
+        if (process.env.ENV === 'debug') {
+            console.error("Error: ", error);
+        }
+
+        console.error('Error executing query');
         logger.error('POST /api/users/updateProfile:  Profile Update:\n First Name: ' + firstName + '\n Last Name: ' + lastName + '\n Phone Number: ' + phoneNumber + '\n' + new Date().toISOString() + " Failed");
         return res.render('status/status_500.ejs', {
             message: "Massive problem, LIKE HUGE"
