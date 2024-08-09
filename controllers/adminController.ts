@@ -115,10 +115,6 @@ exports.updateUserStatus = (req: any, res: any) => {
 
     // Execute query with parameters
     pool.query(query, [InputCleaner.cleanName(first_name), InputCleaner.cleanName(last_name), InputCleaner.cleanStatus(status), userid], (error: any, results: any) => {
-        console.log(InputCleaner.cleanName(first_name));
-        console.log(InputCleaner.cleanName(last_name));
-        console.log(InputCleaner.cleanStatus(status));
-        console.log(InputCleaner.cleanEmail(userid));
         if (error) {
             logger.error('POST /api/admin/updateUserStatus: Error updating user - ' + error.message);
             console.error("Error executing query", error);
