@@ -150,15 +150,15 @@ app.get('/admin/users', (req: any, res) => {
 });
 
 
-// app.get('/transfer', (req: any, res) => {
+app.get('/transfer', (req: any, res) => {
 
-//   if (req.session.user === undefined || req.session.user.userType === 'Admin') {
-//     return res.render('status/status_403', {message: "Unforbidden access."});
-//   }else {
-//     res.render('function_transfer');
-//   }
+  if (req.session.user === undefined || req.session.user.userType === 'Admin') {
+    return res.render('status/status_403', {message: "Unforbidden access."});
+  }else {
+    res.render('function_transfer');
+  }
 
-// });
+});
 
 app.get('/withdraw', (req: any, res) => {
 
@@ -219,7 +219,7 @@ app.get('/logout', (req, res) => {
         });
     } else {
 
-        logger.info(`${req.session.user.email} logged out at ${new Date()}`);
+        // logger.info(`${req.session.user.email} logged out at ${new Date()}`);
         req.session.destroy((err: Error) => {
             if (err) {
                 logger.error('Error destroying session:', err);
@@ -233,7 +233,7 @@ app.get('/logout', (req, res) => {
 app.get('/transactions', async (req, res) => {
     // Check if the user is authenticated and is not an Admin
     if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin') {
-        logger.error('GET /transactions: Unauthorized access attempt');
+        // logger.error('GET /transactions: Unauthorized access attempt');
         return res.render('status/status_403', {
             message: 'Unauthorized'
         });
@@ -283,7 +283,7 @@ app.get('/transactions', async (req, res) => {
         }
     } catch (err) {
         // Log the error and return a 500 status
-        logger.error(`GET /transactions: Error retrieving transactions - ${err}`);
+        // logger.error(`GET /transactions: Error retrieving transactions - ${err}`);
         res.status(500).json({ message: "An error occurred while retrieving transactions" });
     } finally {
         // Release the client back to the pool
