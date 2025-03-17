@@ -1,6 +1,4 @@
 import express from 'express'
-import path from 'path'
-import fs from 'fs';
 
 const router = express.Router()
 const UserController = require('../controllers/UserController')

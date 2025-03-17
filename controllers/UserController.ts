@@ -326,18 +326,18 @@ exports.deposit = async (req: Request, res: Response) => {
 
 exports.withdraw = async (req: Request, res: Response) => {
 
-    if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin') {
-        logger.error('POST /api/users/deposit:  Unauthorized access attempt');
-        return res.status(401).json({ message: "Unauthorized" });
-    }
+    // if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin') {
+    //     logger.error('POST /api/users/deposit:  Unauthorized access attempt');
+    //     return res.status(401).json({ message: "Unauthorized" });
+    // }
 
-    const errors = validationResult(req);
+    // const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        return res.render('status/status_400', {
-            message: "Invalid input"
-        });
-    }
+    // if (!errors.isEmpty()) {
+    //     return res.render('status/status_400', {
+    //         message: "Invalid input"
+    //     });
+    // }
 
     const email = req.session.user?.email || ""; // Use an empty string as the default value if email is undefined
     const {amount} = req.body;

@@ -58,7 +58,7 @@ try {
     cookie: {
       secure: true,
       httpOnly: true,
-      maxAge: 10000 // last for only 1 hour
+      maxAge: 600000000 // last for only 1 hour
     }
   }))
 }catch (e) {

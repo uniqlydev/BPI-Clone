@@ -1,5 +1,4 @@
 import winston, { Logger } from 'winston';
-import { LoggingWinston } from '@google-cloud/logging-winston';
 import fs from 'fs';
 import path from 'path';
 import DailyRotateFile from 'winston-daily-rotate-file';
@@ -14,19 +13,27 @@ if (!fs.existsSync(logDirectory)) {
   fs.mkdirSync(logDirectory);
 }
 
-// Create a Winston logger that streams to Cloud Logging and a local file
+// Create a Winston logger that streams to the console and a local file
 const logger: Logger = winston.createLogger({
   level: 'info',
   transports: [
-    new winston.transports.Console(), // Logs to the console
+    new winston.transports.Console({ // Logs to the console
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      ),
+    }),
     new DailyRotateFile({
       filename: logFilePath,
       datePattern: 'YYYY-MM-DD', // Log file will be named with the date (e.g., app-2024-08-08.log)
       maxSize: '20m', // Maximum size of a log file before it gets rotated
       maxFiles: '14d', // Maximum number of days to keep log files
-      handleExceptions: true // Handle file write errors gracefully
+      handleExceptions: true, // Handle file write errors gracefully
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      ),
     }),
-    new LoggingWinston() // Logs to Google Cloud Logging
   ],
 });
 
