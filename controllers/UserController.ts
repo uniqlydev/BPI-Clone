@@ -279,6 +279,13 @@ exports.deposit = async (req: Request, res: Response) => {
         });
     }
 
+    // log session
+    console.log('from the controller' , req.session.user, 
+        req.session.user?.email,
+        req.session.user?.authenticated,
+        req.session.user?.userType
+    );
+
 
     // CHange account Num to session
     const {date, amount ,checkNum} = req.body;
@@ -319,7 +326,7 @@ exports.deposit = async (req: Request, res: Response) => {
             console.error('Error executing query:', error);
         }
 
-        // logger.error('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Failed");
+        logger.error('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Failed");
         res.status(500).json({ message: 'An error occurred' });
     }
 };

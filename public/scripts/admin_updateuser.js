@@ -4,19 +4,15 @@ document.addEventListener('DOMContentLoaded', function() {
     buttons.forEach(button => {
         button.addEventListener('click', function() {
             const userId = this.getAttribute('data-user-id');
-            const lastName = document.getElementById(`last_name_${userId}`).value;
-            const firstName = document.getElementById(`first_name_${userId}`).value;
             const status = document.getElementById(`status_${userId}`).value;
             const newStatus = status === 'active';
 
             const newBody = {
-                last_name: lastName,
-                first_name: firstName,
                 userid: userId,
                 status: newStatus
             };
 
-            fetch('/api/admin/updateuser', {
+            fetch('/api/admin/updateuser', {  // Updated endpoint
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -25,13 +21,13 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error("There was an error");
+                    throw new Error("There was an error updating the status");
                 }
                 return response.json();
             })
             .then(data => {
                 alert('User status changed');
-                window.location.href = '/admin/dashboard';
+                window.location.href = '/acctadmin/dashboard';
             })
             .catch(error => {
                 console.error('Error:', error);

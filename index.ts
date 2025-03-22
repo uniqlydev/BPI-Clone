@@ -32,8 +32,8 @@ app.use(morgan('dev'));
 
 // Setup rate limiter to prevent brute force attacks
 const apiLimiter = rate_limiter({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 3, // limit each IP to 3 requests per windowMs
+  windowMs: 15 * 60 * 1000, // 1 minute
+  max: 10000, // limit each IP to 3 requests per windowMs
   message: 'Too many requests from this IP, please try again later.'
 });
 
@@ -54,11 +54,11 @@ try {
   app.use(session({
     secret: process.env.SESSION_SECRET || require('crypto').randomBytes(16).toString('hex'),
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
       secure: true,
       httpOnly: true,
-      maxAge: 10000 // last for only 1 hour
+      maxAge: 3600000 // last for only 1 hour
     }
   }))
 }catch (e) {
@@ -91,7 +91,6 @@ app.get('/register', (req: any, res: { render: (arg0: string) => void }) => {
     console.log('Session:', req.session);
     res.render('register');
 });
-
 
 //added consideration for acctad here 
 app.get('/admin', (req, res) => {
@@ -133,7 +132,7 @@ app.get('/acctadmin/dashboard', (req: any, res) => {
 
 
 app.get('/admin/createcheque', (req: any, res) => {
-  if (req.session.user === undefined || req.session.user.userType !== 'Admin') {
+  if (req.session.user === undefined || req.session.user.userType !== 'transacad') {
     return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
@@ -143,11 +142,11 @@ app.get('/admin/createcheque', (req: any, res) => {
 
 
 app.get('/admin/users', (req: any, res) => {
-  if (req.session.user === undefined || req.session.user.userType !== 'Admin') {
+  if (req.session.user === undefined || req.session.user.userType !== 'acctad') {
     return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
-  const query = "SELECT id, first_name, last_name, is_active FROM users WHERE role='user'"
+  const query = "SELECT u.id, u.first_name, u.last_name, u.is_active, t.flagged, t.id AS transactionID, t.type FROM users u join transactions t on u.id = t.accountnumber WHERE role='user'"
 
   pool.query(query, (err: string, result: { rows: any; }) => {
     if (err) {
@@ -308,6 +307,68 @@ app.get('/transactions', async (req, res) => {
         client.release();
     }
 });
+
+
+
+
+
+
+app.get('/adminTransactions', async (req, res) => {
+  if (req.session.user === undefined || req.session.user.userType !== 'transacad') {
+    return res.render('status/status_403', { message: 'Unauthorized' });
+  }
+
+  const client = await pool.connect();
+
+  const query = `
+      SELECT 
+          x.id AS transaction_id, 
+          u.email AS user_email, 
+          CASE WHEN x.type = 'D' THEN t.amountdeposited ELSE 0 END AS amountdeposited,
+          CASE WHEN x.type = 'W' THEN w.amountwithdrawn ELSE 0 END AS amountwithdrawn,
+          t.chequenum, x.flagged,
+          x.type
+      FROM 
+          deposits t
+          JOIN withdraw w ON t.accountnumber = w.accountnumber
+          JOIN transactions x ON t.accountnumber = x.accountnumber
+          JOIN users u ON t.accountnumber = u.id
+      ORDER BY 
+          x.type;
+  `;
+
+  try {
+      const result = await client.query(query);
+      res.render('admin_transactions', { transactions: result.rows });
+  } catch (err) {
+      res.status(500).json({ message: "An error occurred while retrieving transactions" });
+  } finally {
+      client.release();
+  }
+});
+
+// Route to report a transaction
+app.post('/adminTransactions/report', async (req, res) => {
+  if (req.session.user === undefined || req.session.user.userType !== 'transacad') {
+    return res.render('status/status_403', { message: 'Unauthorized' });
+  }
+
+  const { transaction_id } = req.body; // Get transaction ID from the frontend
+  const client = await pool.connect();
+
+  try {
+      const query = `UPDATE transactions SET flagged = true WHERE id = $1`;
+      await client.query(query, [transaction_id]);
+
+      res.json({ success: true, message: "Transaction flagged successfully" });
+  } catch (err) {
+      res.status(500).json({ message: "Error flagging transaction" });
+  } finally {
+      client.release();
+  }
+});
+
+
 
 
 

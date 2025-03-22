@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions</title>
+    <link rel="stylesheet" href="styles/colors.css">
+    <link rel="stylesheet" href="styles/fonts.css">
+    <link rel="stylesheet" href="styles/navbar.css">
+    <link rel="stylesheet" href="styles/transactions.css">
+</head>
+<body>
+    <div class="container">
+        <button onclick="window.location.href='/admin/dashboard'" class="back-btn">Back to Dashboard</button>
+
+        <h1>Transactions</h1>
+
+        <% if (transactions.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Amount Deposited</th>
+                        <th>Amount Withdrawn</th>
+                        <th>Cheque Number</th>
+                        <th>Type</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% transactions.forEach(function(transaction) { %>
+                        <tr>
+                            <td><%= transaction.user_email %></td>
+                            <td><%= transaction.amountdeposited %></td>
+                            <td><%= transaction.amountwithdrawn %></td>
+                            <td><%= transaction.chequenum %></td>
+                            <td><%= transaction.type %></td>
+                            <td>
+                                <% if (transaction.flagged == false) { %>
+                                    <button class="report-btn" data-id="<%= transaction.transaction_id %>">Report</button>
+                                <% } else { %>
+                                    <span>Flagged</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <div class="message">
+                <p>No transactions found.</p>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>
+
+<script>
+    document.querySelectorAll('.report-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const transactionId = this.dataset.id;
+
+            fetch('/adminTransactions/report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transaction_id: transactionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                location.reload(); // Refresh to reflect changes
+            })
+            .catch(err => console.error(err));
+        });
+    });
+</script>

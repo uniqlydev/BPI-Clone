@@ -26,7 +26,7 @@ const logger: Logger = winston.createLogger({
       maxFiles: '14d', // Maximum number of days to keep log files
       handleExceptions: true // Handle file write errors gracefully
     }),
-    new LoggingWinston() // Logs to Google Cloud Logging
+    // new LoggingWinston() // Logs to Google Cloud Logging
   ],
 });
 

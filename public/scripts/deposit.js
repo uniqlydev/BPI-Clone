@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         console.log(body)
+        
 
         // Create post request
         fetch('/api/users/deposit', {

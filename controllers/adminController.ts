@@ -68,8 +68,9 @@ exports.createCheque = async (req: any, res: any) => {
         return res.status(400).send("Invalid input");
     }
 
-    if (!req.session.user || req.session.user.userType !== 'Admin') {
+    if (!req.session.user || req.session.user.userType !== 'transacad') {
         // logger.warn('POST /api/admin/createcheque: Unauthorized access attempt');
+        console.log('this is from createCheque'+ req.session.user + req.session.user.userType);
         return res.status(403).send('Unauthorized');
     }
 
@@ -96,34 +97,29 @@ exports.createCheque = async (req: any, res: any) => {
 };
 
 exports.updateUserStatus = (req: any, res: any) => {
-    // logger.info('POST /api/admin/updateUserStatus: Request received at ' + new Date().toISOString());
-
-    // Sanitize
+    // Sanitize input
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        // logger.warn('POST /api/admin/updateUserStatus: Validation errors - ' + JSON.stringify(errors.array()));
         return res.status(400).send("Invalid input");
     }
 
     // Extract data from request
-    const { first_name, last_name, status, userid } = req.body;
+    const { status, userid } = req.body;
 
-    // Update query
+    // Update query (only status)
     const query = `
         UPDATE public.users
-        SET first_name = $1, last_name = $2, is_active = $3
-        WHERE id = $4
+        SET is_active = $1
+        WHERE id = $2
     `;
 
     // Execute query with parameters
-    pool.query(query, [InputCleaner.cleanName(first_name), InputCleaner.cleanName(last_name), InputCleaner.cleanStatus(status), userid], (error: any, results: any) => {
+    pool.query(query, [InputCleaner.cleanStatus(status), userid], (error: any, results: any) => {
         if (error) {
-            // logger.error('POST /api/admin/updateUserStatus: Error updating user - ' + error.message);
             console.error("Error executing query", error);
             return res.status(500).json("Internal server error");
         }
 
-        // logger.info('POST /api/admin/updateUserStatus: User updated successfully - userid: ' + userid);
-        res.status(200).json("User updated successfully");
+        res.status(200).json("User status updated successfully");
     });
 };

@@ -12,13 +12,18 @@
 </head>
 <body>
     <div class="container">
+        <button onclick="window.location.href='/acctadmin/dashboard'" class="back-btn">Back to Dashboard</button>
+
         <table>
             <thead>
                 <tr>
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Status</th>
-                    <th></th>
+                    <th>Transaction ID</th>
+                    <th>Transaction Type</th>
+                    <th>Flagged</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,10 +31,10 @@
                 <% users.forEach(user => { %>
                     <tr>
                         <td>
-                            <input type="text" name="first_name" id="first_name_<%= user.id %>" value="<%= user.first_name %>">
+                            <span id="first_name_<%= user.id %>"><%= user.first_name %></span>
                         </td>
                         <td>
-                            <input type="text" name="last_name" id="last_name_<%= user.id %>" value="<%= user.last_name %>">
+                            <span id="last_name_<%= user.id %>"><%= user.last_name %></span>
                         </td>
                         <td>
                             <select name="status" id="status_<%= user.id %>">
@@ -37,6 +42,16 @@
                                 <option value="inactive" <%= !user.is_active ? 'selected' : '' %>>Inactive</option>
                             </select>
                         </td>
+                        <td>
+                            <span><%= user.transactionid %></span>
+                        </td>
+                        <td>
+                            <span><%= user.type %></span>
+                        </td>
+                        <td>
+                            <span><%= user.flagged ? 'Yes' : 'No' %></span>
+                        </td>
+                       
                         <td>
                             <button type="button" class="submit-btn" data-user-id="<%= user.id %>">Update</button>
                         </td>
