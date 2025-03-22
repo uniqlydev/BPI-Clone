@@ -410,3 +410,37 @@ exports.updateProfile = async (req: Request, res: Response) => {
         })
     }
 };
+
+exports.transfer = async (req: Request, res: Response) => {
+    if (!req.session?.user?.authenticated || req.session?.user?.userType === "Admin") {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.render("status/status_400", { message: "Invalid input" });
+    }
+
+    const email = req.session.user?.email || ""; // Sender's email from session
+    const { receiver, amount } = req.body;
+
+    const converted_amount = InputCleaner.cleanMoney(amount);
+
+    const client = await pool.connect();
+    const query = "CALL createtransfer($1, $2, $3)";
+
+    const values = [email, receiver, converted_amount];
+
+    try {
+        await client.query(query, values);
+        await client.release();
+
+        res.status(201).json({ message: "Transfer completed successfully" });
+    } catch (error) {
+        if (process.env.ENV === "debug") {
+            console.error("Error executing query:", error);
+        }
+
+        res.status(500).json({ message: "An error occurred during transfer" });
+    }
+};

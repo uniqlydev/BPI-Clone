@@ -34,5 +34,6 @@ router.post('/img' ,imageUpload.single('image'), UserController.uploadImage);
 router.post('/deposit', isAuthenticatedUser ,UserController.deposit);
 router.post('/withdraw', isAuthenticatedUser ,UserController.withdraw);
 router.post('/profile/update',isAuthenticatedUser, UserController.updateProfile);
+router.post('/transfer', isAuthenticatedUser, UserController.transfer);
 
 module.exports = router
