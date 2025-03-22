@@ -61,7 +61,6 @@ const isValidPassword = (password) => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    const adminLoginForm = document.getElementById('adminLoginForm');
     const admin_submit = document.getElementById('admin_submit');
 
     admin_submit.addEventListener('click', async (e) => {
@@ -90,8 +89,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Fetch request sent, response received');
 
                 if (response.ok) {
-                    console.log('Login successful, redirecting to dashboard');
-                    window.location.href = '/admin/dashboard';
+                    const data = await response.json(); // Get the role from response
+                    console.log('Login successful, role:', data.role);
+
+                    // Redirect based on role
+                    if (data.role === 'acctad') {
+                        window.location.href = '/acctadmin/dashboard';
+                    } else if (data.role === 'transacad') {
+                        window.location.href = '/admin/dashboard';
+                    }
                 } else {
                     const errorText = await response.text();
                     alert('Login failed: ' + errorText);

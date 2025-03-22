@@ -21,7 +21,7 @@ exports.login = (req: any, res: any) => {
         return res.status(400).send("Invalid email address");
     }
 
-    const query = "SELECT * FROM Users WHERE email = $1 AND role = 'superuser' LIMIT 1";
+    const query = "SELECT * FROM Users WHERE email = $1 AND role IN ('superuser', 'transacad', 'acctad') LIMIT 1";
 
     pool.query(query, [req.body.email], async (err: string, result: { rows: any; }) => {
         if (err) {
@@ -40,10 +40,12 @@ exports.login = (req: any, res: any) => {
                     email: user.email,
                     authenticated: true,
                     id: user.id,
-                    userType: 'Admin'
+                    userType: user.role
                 };
+                console.log("User role:", user.role);
+                return res.json({ success: true, role: user.role }); // Send role to frontend
+            
 
-                // logger.info('POST /api/admin/login: ' + req.session.user.email + ' logged in successfully');
                 return res.status(200).send('Logged in successfully');
             } else {
                 // logger.error('POST /api/admin/login: Invalid credentials for email - ' + req.body.email);

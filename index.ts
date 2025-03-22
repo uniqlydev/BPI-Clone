@@ -93,25 +93,43 @@ app.get('/register', (req: any, res: { render: (arg0: string) => void }) => {
 });
 
 
+//added consideration for acctad here 
 app.get('/admin', (req, res) => {
   if (req.session.user !== undefined && req.session.user.userType !== 'Admin') {
     res.render('status/status_403', { message: 'Unauthorized' });
-  }else if (req.session.user !== undefined && req.session.user.userType === 'Admin') {
+  }else if (req.session.user !== undefined && req.session.user.userType === 'transacad') {
     res.render('admin_dashboard');
+  }else if (req.session.user !== undefined && req.session.user.userType === 'acctad') {
+    res.render('acct_admin_dashboard');
   }else {
     res.render('admin_login');
   }
 });
 
+
 app.get('/admin/dashboard', (req: any, res) => {
 
   console.log('Session:', req.session);
-  if (req.session.user === undefined || req.session.user.userType !== 'Admin') {
+  if (req.session.user === undefined || req.session.user.userType !== 'transacad') {
     return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
   res.render('admin_dashboard');
 });
+
+
+
+app.get('/acctadmin/dashboard', (req: any, res) => {
+
+  console.log('Session:', req.session);
+  
+  // if (req.session.user === undefined || req.session.user.userType !== 'acctad') {
+  //   return res.render('status/status_403', { message: 'Unauthorized' });
+  // }
+
+  res.render('acct_admin_dashboard');
+});
+
 
 
 app.get('/admin/createcheque', (req: any, res) => {
