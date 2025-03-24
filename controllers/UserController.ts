@@ -9,7 +9,7 @@ import LoginRequest from '../interfaces/LoginRequest';
 import { Request, Response } from 'express';
 import Deposit from '../model/deposit';
 import moment from 'moment';
-import logger from '../utils/Logger';
+// import logger from '../utils/Logger';
 import InputCleaner from '../utils/InputCleaner';
 import { generateOTP } from '../utils/OTPgenerator';
 import { sendEmail } from '../utils/MFAsendemail';
@@ -38,7 +38,7 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
 
     // Check if the password and confirm password match
     if (password !== confirm_password) {
-        logger.error('POST /api/users/register:  Passwords do not match' + new Date().toISOString() + " Failed");
+        // logger.error('POST /api/users/register:  Passwords do not match' + new Date().toISOString() + " Failed");
         return res.status(400).send('Passwords do not match.');
     }
 
@@ -68,7 +68,8 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
             req.session.user = {
                 email: email,
                 authenticated: true,
-                userType: 'user'
+                userType: 'user',
+                otp: '',
             };
 
             // logger.info('POST /api/users/register:  User Reigstered Successfully: ' + new Date().toISOString());
@@ -145,7 +146,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
             console.log(cleanedPassword);
 
             if (cleanedPassword === '') {
-                logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
+                // logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
                 return res.status(400).send('Invalid password');
             }
 
@@ -159,7 +160,8 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
                 req.session.user = {
                     email: req.body.email,
                     authenticated: true,
-                    userType: 'user'
+                    userType: 'user',
+                    otp: '',
                 };
 
                 // OTP Sender and Maker
@@ -174,6 +176,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
                     // Send email
                     await sendEmail( userEmail, 'ITSSDLC OTP Code', `Your one-time code is: ${code}\nIt expires in 5 minutes.` );   
                 }
+                console.log('OTP: ', req.session.user.otp);
 
                 return res.status(200).json({ message: 'Logged in successfully' });
             } else {
@@ -281,11 +284,12 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
 
 exports.deposit = async (req: Request, res: Response) => {
 
-    if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin') {
+    if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin' ) {
         // logger.error('POST /api/users/deposit:  Unauthorized access attempt');
         return res.status(401).json({ message: "Unauthorized" });
     }
 
+    console.log('from the controller' , req.session.user.otp);
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -293,14 +297,6 @@ exports.deposit = async (req: Request, res: Response) => {
             message: "Invalid input"
         });
     }
-
-    // log session
-    console.log('from the controller' , req.session.user, 
-        req.session.user?.email,
-        req.session.user?.authenticated,
-        req.session.user?.userType
-    );
-
 
     // CHange account Num to session
     const {date, amount ,checkNum} = req.body;
@@ -331,9 +327,22 @@ exports.deposit = async (req: Request, res: Response) => {
 
     try {
         await client.query(query, values);
-        await client.release();
+        
+        const userQuery = "SELECT id FROM public.users WHERE email = $1 LIMIT 1;";
+        const userResult = await client.query(userQuery, [email]);
+        const userId = userResult.rows[0].id; // No error checking
 
-        // logger.info('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Success");
+        // Insert audit log
+        const auditQuery = `
+            INSERT INTO public.audit_activity (userid, type, activity, activity_timestamp) 
+            VALUES ($1, 'DEPOSIT', 'User made a deposit', NOW());
+        `;
+        await client.query(auditQuery, [userId]);
+
+        
+        
+        await client.release();
+               
         res.status(201).json({ message: 'Deposit created successfully' });
     } catch (error) {
 
@@ -341,7 +350,7 @@ exports.deposit = async (req: Request, res: Response) => {
             console.error('Error executing query:', error);
         }
 
-        logger.error('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Failed");
+        // logger.error('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Failed");
         res.status(500).json({ message: 'An error occurred' });
     }
 };
@@ -448,6 +457,20 @@ exports.transfer = async (req: Request, res: Response) => {
 
     try {
         await client.query(query, values);
+
+        const userQuery = "SELECT id FROM public.users WHERE email = $1 LIMIT 1;";
+        const userResult = await client.query(userQuery, [email]);
+        const userId = userResult.rows[0].id; // No error checking
+
+        // Insert audit log
+        const auditQuery = `
+            INSERT INTO public.audit_activity (userid, type, activity, activity_timestamp) 
+            VALUES ($1, 'TRANSFER', 'User made a transfer', NOW());
+        `;
+        await client.query(auditQuery, [userId]);
+
+        
+
         await client.release();
 
         res.status(201).json({ message: "Transfer completed successfully" });

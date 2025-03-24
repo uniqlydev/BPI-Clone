@@ -9,7 +9,7 @@ import rate_limiter from 'express-rate-limit'
 import morgan from 'morgan'
 import pool from './model/database'
 import User from './model/User'
-import logger from './utils/Logger'
+// import logger from './utils/Logger'
 import mfaRouter from './routers/mfaRouter'
 
 
@@ -124,9 +124,9 @@ app.get('/acctadmin/dashboard', (req: any, res) => {
 
   console.log('Session:', req.session);
   
-  // if (req.session.user === undefined || req.session.user.userType !== 'acctad') {
-  //   return res.render('status/status_403', { message: 'Unauthorized' });
-  // }
+  if (req.session.user === undefined || req.session.user.userType !== 'acctad') {
+    return res.render('status/status_403', { message: 'Unauthorized' });
+  }
 
   res.render('acct_admin_dashboard');
 });
@@ -170,14 +170,14 @@ app.get('/admin/users', (req: any, res) => {
 
 app.get('/otp', (req: any, res) => {
   if (req.session.user === undefined || req.session.user.userType === 'Admin') {
-    return res.render('status/status_403', {message: "Unforbidden access."});
+    return res.render('status/status_403', {message: " Unauthorized access."});
   } else res.render('otp');
 });
 
 app.get('/transfer', (req: any, res) => {
 
   if (req.session.user === undefined || req.session.user.userType === 'Admin') {
-    return res.render('status/status_403', {message: "Unforbidden access."});
+    return res.render('status/status_403', {message: " Unauthorized access."});
   }else {
     res.render('function_transfer');
   }
@@ -187,14 +187,14 @@ app.get('/transfer', (req: any, res) => {
 app.get('/withdraw', (req: any, res) => {
 
   if (req.session.user === undefined || req.session.user.userType === 'Admin') {
-    return res.render('status/status_403', {message: "Unforbidden access."});
+    return res.render('status/status_403', {message: " Unauthorized access."});
   }else res.render('function_withdraw');
 });
 
 app.get('/deposit', (req: any, res) => {
 
-  if (req.session.user === undefined || req.session.user.userType === 'Admin') {
-    return res.render('status/status_403', {message: "Unforbidden access."});
+  if (req.session.user === undefined || req.session.user.userType === 'Admin' || req.session.user.otp === '') {
+    return res.render('status/status_403', {message: "Unauthorized access."});
   }else res.render('function_deposit');
 });
 
@@ -202,7 +202,7 @@ app.get('/deposit', (req: any, res) => {
 app.get('/profilepicture', (req: any,res) => {
 
   if (req.session.user === undefined || req.session.user.userType === 'Admin') {
-    return res.render('status/status_403', {message: "Unforbidden access."});
+    return res.render('status/status_403', {message: " Unauthorized access."});
   }else res.render('upload');
 });
 
@@ -246,7 +246,7 @@ app.get('/logout', (req, res) => {
         // logger.info(`${req.session.user.email} logged out at ${new Date()}`);
         req.session.destroy((err: Error) => {
             if (err) {
-                logger.error('Error destroying session:', err);
+                // logger.error('Error destroying session:', err);
             }
         });
 

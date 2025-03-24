@@ -6,7 +6,7 @@ const router = express.Router()
 const UserController = require('../controllers/UserController')
 
 import multer from 'multer';
-import { isAuthenticatedUser } from '../middleware/authenticator';
+import { isAuthenticatedUser, isAuthenticatedOTP } from '../middleware/authenticator';
 
 const storage = multer.memoryStorage();
 const imageUpload = multer({
@@ -30,10 +30,10 @@ const imageUpload = multer({
 router.post('/register', UserController.register);
 router.post('/login', UserController.login)
 
-router.post('/img' ,imageUpload.single('image'), UserController.uploadImage);
-router.post('/deposit', isAuthenticatedUser ,UserController.deposit);
-router.post('/withdraw', isAuthenticatedUser ,UserController.withdraw);
-router.post('/profile/update',isAuthenticatedUser, UserController.updateProfile);
-router.post('/transfer', isAuthenticatedUser, UserController.transfer);
+router.post('/img' ,imageUpload.single('image'), isAuthenticatedOTP,  UserController.uploadImage);
+router.post('/deposit', isAuthenticatedUser , isAuthenticatedOTP, UserController.deposit);
+router.post('/withdraw', isAuthenticatedUser , isAuthenticatedOTP, UserController.withdraw);
+router.post('/profile/update',isAuthenticatedUser, isAuthenticatedOTP, UserController.updateProfile);
+router.post('/transfer', isAuthenticatedUser, isAuthenticatedOTP, UserController.transfer);
 
 module.exports = router
