@@ -43,7 +43,8 @@ exports.login = (req: any, res: any) => {
                     email: user.email,
                     authenticated: true,
                     id: user.id,
-                    userType: user.role
+                    userType: user.role,
+                    otp: '',    
                 };
 
                 if (await hasValidMFA(req.body.email) == false) {

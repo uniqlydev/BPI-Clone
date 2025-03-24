@@ -81,7 +81,7 @@ export async function verifyMFA(req: Request, res: Response) {
     req.session.user = {
         email: req.session.user?.email || '',
         authenticated: true,
-        userType: 'user',
+        userType: req.session.user?.userType || '',
         otp: code,
     };
     console.log('OTP: ', req.session.user.otp);

@@ -111,7 +111,7 @@ app.get('/admin', (req, res) => {
 app.get('/admin/dashboard', (req: any, res) => {
 
   console.log('Session:', req.session);
-  if (req.session.user === undefined || req.session.user.userType !== 'transacad') {
+  if (req.session.user === undefined || req.session.user.userType !== 'transacad' || req.session.user.otp === '') {
     return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
@@ -124,7 +124,7 @@ app.get('/acctadmin/dashboard', (req: any, res) => {
 
   console.log('Session:', req.session);
   
-  if (req.session.user === undefined || req.session.user.userType !== 'acctad') {
+  if (req.session.user === undefined || req.session.user.userType !== 'acctad' || req.session.user.otp === '') {
     return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
@@ -134,7 +134,7 @@ app.get('/acctadmin/dashboard', (req: any, res) => {
 
 
 app.get('/admin/createcheque', (req: any, res) => {
-  if (req.session.user === undefined || req.session.user.userType !== 'transacad') {
+  if (req.session.user === undefined || req.session.user.userType !== 'transacad' || req.session.user.otp === '') {
     return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
@@ -144,7 +144,7 @@ app.get('/admin/createcheque', (req: any, res) => {
 
 
 app.get('/admin/users', (req: any, res) => {
-  if (req.session.user === undefined || req.session.user.userType !== 'acctad') {
+  if (req.session.user === undefined || req.session.user.userType !== 'acctad' || req.session.user.otp === '') {
     return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
@@ -182,7 +182,7 @@ app.get('/admin_otp', (req: any, res) => {
 
 app.get('/transfer', (req: any, res) => {
 
-  if (req.session.user === undefined || req.session.user.userType === 'Admin') {
+  if (req.session.user === undefined || req.session.user.userType === 'Admin' || req.session.user.otp === '') {
     return res.render('status/status_403', {message: " Unauthorized access."});
   }else {
     res.render('function_transfer');
@@ -207,7 +207,7 @@ app.get('/deposit', (req: any, res) => {
 
 app.get('/profilepicture', (req: any,res) => {
 
-  if (req.session.user === undefined || req.session.user.userType === 'Admin') {
+  if (req.session.user === undefined || req.session.user.userType === 'Admin' || req.session.user.otp === '') {
     return res.render('status/status_403', {message: " Unauthorized access."});
   }else res.render('upload');
 });
@@ -262,7 +262,7 @@ app.get('/logout', (req, res) => {
 
 app.get('/transactions', async (req, res) => {
     // Check if the user is authenticated and is not an Admin
-    if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin') {
+    if (!req.session?.user?.authenticated || req.session?.user?.userType === 'Admin' || req.session?.user?.otp === '') {
         // logger.error('GET /transactions: Unauthorized access attempt');
         return res.render('status/status_403', {
             message: 'Unauthorized'
@@ -327,7 +327,7 @@ app.get('/transactions', async (req, res) => {
 
 
 app.get('/adminTransactions', async (req, res) => {
-  if (req.session.user === undefined || req.session.user.userType !== 'transacad') {
+  if (req.session.user === undefined || req.session.user.userType !== 'transacad' || req.session.user.otp === '') {
     return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
@@ -362,7 +362,7 @@ app.get('/adminTransactions', async (req, res) => {
 
 // Route to report a transaction
 app.post('/adminTransactions/report', async (req, res) => {
-  if (req.session.user === undefined || req.session.user.userType !== 'transacad') {
+  if (req.session.user === undefined || req.session.user.userType !== 'transacad' || req.session.user.otp === '') {
     return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
