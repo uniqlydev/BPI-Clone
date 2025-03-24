@@ -24,4 +24,14 @@ const isAuthenticatedTransacAdmin = (req: Request, res: Response, next: NextFunc
     }
 }
 
-export { isAuthenticatedUser, isAuthenticatedTransacAdmin, isAuthenticatedAcctAdmin };
+
+
+const isAuthenticatedOTP = (req: Request, res: Response, next: NextFunction) => {
+    if (req.session?.user?.otp && req.session.user.otp !== '') {
+        return next(); // OTP exists and is not an empty string, proceed
+    } else {
+        return res.status(401).json({ message: "Unauthorized" }); // OTP is missing or empty
+    }
+};
+
+export { isAuthenticatedUser, isAuthenticatedTransacAdmin, isAuthenticatedAcctAdmin, isAuthenticatedOTP };
