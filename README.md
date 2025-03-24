@@ -21,6 +21,10 @@
   - In your terminal, run ```docker build -t postgres_server .``` to build the docker image
   - Run ```docker run -d -p 5432:5432 postgres_server``` to run the docker container
   - The ```init.sql``` will be run automatically to create the database and table for the project
+- Setup **GMAIL SMTP**
+  - In Gmail, go to "Manage your Google account" and enable two-factor authentication
+  - Go to App Passwords and add a new app specific password
+  - Copy the password shown on screen and setup the ```.env``` file with your credentials
 - Setup **.env**
   - Create a ```.env``` file in the **root directory**
     - DB_HOST=localhost
@@ -29,6 +33,10 @@
     - DB_PASSWORD=password
     - DB_PORT=5432
     - ENV= debug // Optional
+    - SMTP_HOST=smtp.gmail.com
+    - SMTP_PORT=465 
+    - SMTP_USER=```your@gmail.com```
+    - SMTP_PASS=```yourAppPassword```
 
 - Setup ```https credentials```
   - In the root directory, run ```openssl req -newkey rsa:2048 -nodes -keyout server.key -x509 -days 365 -out server.crt```

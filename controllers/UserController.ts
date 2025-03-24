@@ -11,7 +11,10 @@ import Deposit from '../model/deposit';
 import moment from 'moment';
 import logger from '../utils/Logger';
 import InputCleaner from '../utils/InputCleaner';
-
+import { generateOTP } from '../utils/OTPgenerator';
+import { sendEmail } from '../utils/MFAsendemail';
+import '../model/mfa';
+import { hasValidMFA, insertMFA } from './mfaController';
 
 
 
@@ -159,8 +162,20 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
                     userType: 'user'
                 };
 
-                return res.status(200).json({ message: 'Logged in successfully' });
+                // OTP Sender and Maker
+                if (await hasValidMFA(req.body.email) == false) {
+                    const userEmail = req.body.email;
+                    const code = generateOTP();
+                    const expiresAt = new Date(Date.now() + 5 * 60000); // 5 min
 
+                    // Insert into DB
+                    await insertMFA({ email: userEmail, code, expires_at: expiresAt });
+                    
+                    // Send email
+                    await sendEmail( userEmail, 'ITSSDLC OTP Code', `Your one-time code is: ${code}\nIt expires in 5 minutes.` );   
+                }
+
+                return res.status(200).json({ message: 'Logged in successfully' });
             } else {
 
                 // Audit logging

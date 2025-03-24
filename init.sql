@@ -93,6 +93,16 @@ CREATE TABLE cheques (
     used BOOLEAN DEFAULT FALSE
 );
 
+DROP TABLE IF EXISTS mfa;
+CREATE TABLE mfa (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(100) NOT NULL,
+  code VARCHAR(10) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  used_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Procedures
 DROP PROCEDURE IF EXISTS createDeposit;
 CREATE PROCEDURE createDeposit (IN P_accountNumber VARCHAR(100), IN chequeNumNew NUMERIC, IN amount_check NUMERIC, IN P_date DATE)
