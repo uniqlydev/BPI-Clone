@@ -11,7 +11,7 @@ CREATE ROLE app_user WITH LOGIN PASSWORD 'password';
 CREATE TYPE activity AS ENUM ('login', 'logout', 'create', 'update', 'delete');
 ALTER TYPE activity OWNER TO app_user;
 
-CREATE TYPE role AS ENUM ('user', 'superuser');
+CREATE TYPE role AS ENUM ('user', 'superuser', 'acctad', 'transacad');
 ALTER TYPE role OWNER TO app_user;
 
 -- Create table

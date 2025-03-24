@@ -24,7 +24,7 @@ exports.login = (req: any, res: any) => {
         return res.status(400).send("Invalid email address");
     }
 
-    const query = "SELECT * FROM Users WHERE email = $1 AND role IN ('superuser', 'transacad', 'acctad') LIMIT 1";
+    const query = "SELECT * FROM users WHERE email = $1 AND role IN ('superuser', 'transacad', 'acctad') LIMIT 1";
 
     pool.query(query, [req.body.email], async (err: string, result: { rows: any; }) => {
         if (err) {
@@ -46,7 +46,6 @@ exports.login = (req: any, res: any) => {
                     userType: user.role
                 };
 
-                // OTP Sender and Maker
                 if (await hasValidMFA(req.body.email) == false) {
                     const userEmail = req.body.email;
                     const code = generateOTP();
@@ -58,14 +57,8 @@ exports.login = (req: any, res: any) => {
                     // Send email
                     await sendEmail( userEmail, 'ITSSDLC OTP Code', `Your one-time code is: ${code}\nIt expires in 5 minutes.` );   
                 }
+
                 return res.json({ success: true, role: user.role }); // Send role to frontend
-
-
-                // console.log("User role:", user.role);
-                // return res.json({ success: true, role: user.role }); // Send role to frontend
-            
-
-                // return res.status(200).send('Logged in successfully');
             } else {
                 // logger.error('POST /api/admin/login: Invalid credentials for email - ' + req.body.email);
                 return res.status(400).send('Invalid credentials');

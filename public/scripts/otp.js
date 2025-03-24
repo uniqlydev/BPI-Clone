@@ -1,5 +1,4 @@
 
-
 const otpValue = [];
 
 function moveNext(input, index) {
@@ -40,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(error);
         });
     });
-
 });
 
 

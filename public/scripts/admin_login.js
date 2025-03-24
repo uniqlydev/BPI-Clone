@@ -92,14 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = await response.json(); // Get the role from response
                     console.log('Login successful, role:', data.role);
 
-                    // Redirect based on role
-                    if (data.role === 'acctad') {
-                        window.location.href = '/otp';
-                        // window.location.href = '/acctadmin/dashboard';
-                    } else if (data.role === 'transacad') {
-                        window.location.href = '/otp';
-                        // window.location.href = '/admin/dashboard';
-                    }
+                    sessionStorage.setItem('dataKey', data.role);
+                    window.location.href = '/admin_otp';
                 } else {
                     const errorText = await response.text();
                     alert('Login failed: ' + errorText);
