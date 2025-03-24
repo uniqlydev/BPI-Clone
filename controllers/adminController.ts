@@ -5,6 +5,9 @@ import Hash from '../utils/HashUtility';
 import moment from 'moment';
 import logger from '../utils/Logger';
 import InputCleaner from '../utils/InputCleaner';
+import { hasValidMFA, insertMFA } from './mfaController';
+import { generateOTP } from '../utils/OTPgenerator';
+import { sendEmail } from '../utils/MFAsendemail';
 
 exports.login = (req: any, res: any) => {
     // logger.info('POST /api/admin/login: Request received at ' + new Date().toISOString());
@@ -42,11 +45,27 @@ exports.login = (req: any, res: any) => {
                     id: user.id,
                     userType: user.role
                 };
-                console.log("User role:", user.role);
+
+                // OTP Sender and Maker
+                if (await hasValidMFA(req.body.email) == false) {
+                    const userEmail = req.body.email;
+                    const code = generateOTP();
+                    const expiresAt = new Date(Date.now() + 5 * 60000); // 5 min
+
+                    // Insert into DB
+                    await insertMFA({ email: userEmail, code, expires_at: expiresAt });
+                    
+                    // Send email
+                    await sendEmail( userEmail, 'ITSSDLC OTP Code', `Your one-time code is: ${code}\nIt expires in 5 minutes.` );   
+                }
                 return res.json({ success: true, role: user.role }); // Send role to frontend
+
+
+                // console.log("User role:", user.role);
+                // return res.json({ success: true, role: user.role }); // Send role to frontend
             
 
-                return res.status(200).send('Logged in successfully');
+                // return res.status(200).send('Logged in successfully');
             } else {
                 // logger.error('POST /api/admin/login: Invalid credentials for email - ' + req.body.email);
                 return res.status(400).send('Invalid credentials');

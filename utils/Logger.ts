@@ -10,9 +10,9 @@ const logFilePattern = 'app-%DATE%.log';
 const logFilePath = path.join(logDirectory, logFilePattern);
 
 // Ensure the logs directory exists
-if (!fs.existsSync(logDirectory)) {
-  fs.mkdirSync(logDirectory);
-}
+// if (!fs.existsSync(logDirectory)) {
+//   fs.mkdirSync(logDirectory);
+// }
 
 // Create a Winston logger that streams to Cloud Logging and a local file
 const logger: Logger = winston.createLogger({
@@ -31,19 +31,19 @@ const logger: Logger = winston.createLogger({
 });
 
 // Ensure the log file is created and then make it read-only
-fs.access(logFilePath.replace('%DATE%', new Date().toISOString().split('T')[0]), fs.constants.F_OK, (err) => {
-  if (!err) {
-    // Set file permissions to read-only
-    fs.chmod(logFilePath.replace('%DATE%', new Date().toISOString().split('T')[0]), 0o444, (chmodErr) => {
-      if (chmodErr) {
-        console.error(`Failed to make ${logFilePattern} read-only: ${chmodErr.message}`);
-      } else {
-        console.log(`${logFilePattern} is now read-only.`);
-      }
-    });
-  } else {
-    console.error(`Log file does not exist: ${err.message}`);
-  }
-});
+// fs.access(logFilePath.replace('%DATE%', new Date().toISOString().split('T')[0]), fs.constants.F_OK, (err) => {
+//   if (!err) {
+//     // Set file permissions to read-only
+//     fs.chmod(logFilePath.replace('%DATE%', new Date().toISOString().split('T')[0]), 0o444, (chmodErr) => {
+//       if (chmodErr) {
+//         console.error(`Failed to make ${logFilePattern} read-only: ${chmodErr.message}`);
+//       } else {
+//         console.log(`${logFilePattern} is now read-only.`);
+//       }
+//     });
+//   } else {
+//     console.error(`Log file does not exist: ${err.message}`);
+//   }
+// });
 
 export default logger;

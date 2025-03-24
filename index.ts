@@ -10,6 +10,7 @@ import morgan from 'morgan'
 import pool from './model/database'
 import User from './model/User'
 import logger from './utils/Logger'
+import mfaRouter from './routers/mfaRouter'
 
 
 
@@ -71,6 +72,7 @@ app.use('/api', apiLimiter);
 // Routes
 app.use('/api/users', require('./routers/userRouter'));
 app.use('/api/admin', require('./routers/adminRouter'));
+app.use('/mfa', mfaRouter);
 
 
 app.get('/', async (req: any, res: { render: (arg0: string) => void }) => {
@@ -166,6 +168,11 @@ app.get('/admin/users', (req: any, res) => {
   });
 });
 
+app.get('/otp', (req: any, res) => {
+  if (req.session.user === undefined || req.session.user.userType === 'Admin') {
+    return res.render('status/status_403', {message: "Unforbidden access."});
+  } else res.render('otp');
+});
 
 app.get('/transfer', (req: any, res) => {
 

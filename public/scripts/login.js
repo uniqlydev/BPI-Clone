@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }).then(data => {
                 console.log(data);
-                window.location.href = '/deposit';
+                window.location.href = '/otp';
             }).catch(error => {
                 console.log(error);
             });

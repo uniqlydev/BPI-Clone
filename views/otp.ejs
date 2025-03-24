@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BPI - Bank of the Philippine Islands</title>
+    <link rel="stylesheet" href="styles/colors.css">
+    <link rel="stylesheet" href="styles/fonts.css">
+    <link rel="stylesheet" href="styles/otp.css">
+    <script src = "scripts/otp.js"></script>
+</head>
+<body>
+    <aside>
+        <div class="logo-container">
+            <h1>BPI</h1>
+        </div>
+        <div class="otp-group">
+            <div class="otp-group1">
+                <form action="" class = "otpForm">
+                    <input type="text" class="otp-input" maxlength="1" oninput="moveNext(this, 0)">
+                    <input type="text" class="otp-input" maxlength="1" oninput="moveNext(this, 1)">
+                    <input type="text" class="otp-input" maxlength="1" oninput="moveNext(this, 2)">
+                    <input type="text" class="otp-input" maxlength="1" oninput="moveNext(this, 3)">
+                    <input type="text" class="otp-input" maxlength="1" oninput="moveNext(this, 4)">
+                    <input type="text" class="otp-input" maxlength="1" oninput="moveNext(this, 5)">
+                    <button id="submit" type="button"> Submit </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+</body>
+</html>
