@@ -94,9 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Redirect based on role
                     if (data.role === 'acctad') {
-                        window.location.href = '/acctadmin/dashboard';
+                        window.location.href = '/otp';
+                        // window.location.href = '/acctadmin/dashboard';
                     } else if (data.role === 'transacad') {
-                        window.location.href = '/admin/dashboard';
+                        window.location.href = '/otp';
+                        // window.location.href = '/admin/dashboard';
                     }
                 } else {
                     const errorText = await response.text();

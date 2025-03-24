@@ -25,9 +25,10 @@ export async function insertMFA(mfa: mfa) {
 }
 
 export async function hasValidMFA(email: String) {
-    const query = `SELECT * FROM mfa WHERE email = '` + email + `' AND NOW() < expires_at;`;
+    const query = `SELECT * FROM mfa WHERE email = '` + email + `' AND NOW() < expires_at AND used_at = null;`;
     const { rows } = await pool.query(query);
-    return rows !== "";
+    logger.info(rows);
+    return rows != "";
 }
 
 export async function getMFA(email: String, code: string): Promise<mfa | null> {
