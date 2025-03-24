@@ -77,7 +77,7 @@ app.use('/mfa', mfaRouter);
 
 app.get('/', async (req: any, res: { render: (arg0: string) => void }) => {
 
-  console.log('Session:', req.session.user);
+  // console.log('Session:', req.session.user);
 
   if (req.session.user === undefined) {
     res.render('index');
@@ -90,7 +90,7 @@ app.get('/', async (req: any, res: { render: (arg0: string) => void }) => {
 });
 
 app.get('/register', (req: any, res: { render: (arg0: string) => void }) => {
-    console.log('Session:', req.session);
+    // console.log('Session:', req.session);
     res.render('register');
 });
 
@@ -110,7 +110,7 @@ app.get('/admin', (req, res) => {
 
 app.get('/admin/dashboard', (req: any, res) => {
 
-  console.log('Session:', req.session);
+  // console.log('Session:', req.session);
   if (req.session.user === undefined || req.session.user.userType !== 'transacad' || req.session.user.otp === '') {
     return res.render('status/status_403', { message: 'Unauthorized' });
   }
@@ -122,7 +122,7 @@ app.get('/admin/dashboard', (req: any, res) => {
 
 app.get('/acctadmin/dashboard', (req: any, res) => {
 
-  console.log('Session:', req.session);
+  // console.log('Session:', req.session);
   
   if (req.session.user === undefined || req.session.user.userType !== 'acctad' || req.session.user.otp === '') {
     return res.render('status/status_403', { message: 'Unauthorized' });
@@ -159,7 +159,7 @@ app.get('/admin/users', (req: any, res) => {
     if (result && result.rows && result.rows.length > 0) {
       const users = result.rows;
 
-      console.log(users);
+      // console.log(users);
 
       res.render('admin_users', { users });
     } else {
@@ -362,24 +362,46 @@ app.get('/adminTransactions', async (req, res) => {
 
 // Route to report a transaction
 app.post('/adminTransactions/report', async (req, res) => {
-  if (req.session.user === undefined || req.session.user.userType !== 'transacad' || req.session.user.otp === '') {
-    return res.render('status/status_403', { message: 'Unauthorized' });
+  if (!req.session.user || req.session.user.userType !== 'transacad' || !req.session.user.otp) {
+      return res.render('status/status_403', { message: 'Unauthorized' });
   }
 
-  const { transaction_id } = req.body; // Get transaction ID from the frontend
+  const { transaction_id } = req.body;
   const client = await pool.connect();
 
   try {
-      const query = `UPDATE transactions SET flagged = true WHERE id = $1`;
-      await client.query(query, [transaction_id]);
+      await client.query('BEGIN'); // Start transaction
 
+
+      const adminQuery = `SELECT id FROM users WHERE email = $1 LIMIT 1`;
+      const adminResult = await client.query(adminQuery, [req.session.user.email]);
+
+      if (adminResult.rows.length === 0) {
+          throw new Error("Admin user not found");
+      }
+
+      const adminId = adminResult.rows[0].id; // Extract admin ID
+
+      const updateQuery = `UPDATE transactions SET flagged = true WHERE id = $1`;
+      await client.query(updateQuery, [transaction_id]);
+
+      const auditQuery = `
+          INSERT INTO public.audit_activity (userid, type, activity, activity_timestamp) 
+          VALUES ($1, 'FLAGGING', $2, NOW());
+      `;
+      const activityMessage = `Transaction ID ${transaction_id} flagged`;
+      await client.query(auditQuery, [adminId, activityMessage]);
+
+      await client.query('COMMIT'); // Commit transaction
       res.json({ success: true, message: "Transaction flagged successfully" });
   } catch (err) {
-      res.status(500).json({ message: "Error flagging transaction" });
+      await client.query('ROLLBACK'); // Rollback if an error occurs
+      console.error("Error flagging transaction:", err);
   } finally {
       client.release();
   }
 });
+
 
 
 

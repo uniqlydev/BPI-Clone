@@ -792,7 +792,11 @@ GRANT ALL ON FUNCTION public.uuid_nil() TO app_user;
 GRANT ALL ON FUNCTION public.uuid_ns_dns() TO app_user;
 
 
---
+--ALTER TABLE public.audit_activity 
+ALTER TABLE public.audit_activity 
+ALTER COLUMN activity TYPE VARCHAR(255);
+
+
 -- Name: FUNCTION uuid_ns_oid(); Type: ACL; Schema: public; Owner: postgres
 --
 

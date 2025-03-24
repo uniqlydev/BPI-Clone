@@ -52,7 +52,7 @@ export async function markMFACodeUsed(id: number): Promise<void> {
 export async function whichAdminAccount(email: String) {
     const query = `SELECT role FROM users WHERE email = $1`;
     const { rows } = await pool.query(query, [email]);
-    console.log(rows[0].role);
+    // console.log(rows[0].role);
     return rows.length > 0 ? rows[0].role : null;
 }
 
@@ -84,7 +84,6 @@ export async function verifyMFA(req: Request, res: Response) {
         userType: req.session.user?.userType || '',
         otp: code,
     };
-    console.log('OTP: ', req.session.user.otp);
 
     return res.status(200).json({ message: 'Logged in successfully' });
 };

@@ -109,13 +109,13 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        console.log('Nandito')
+        // console.log('Nandito')
         // logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
         return res.status(400).send("Invalid input");
     }
 
     if (Validator.isEmail(req.body.email) === false) {
-        console.log('Nandito1')
+        // console.log('Nandito1')
         // logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
         return res.status(400).send("Invalid email address");
     }
@@ -143,7 +143,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
             const hasher = new Hash();
             const cleanedPassword = InputCleaner.cleanPassword(req.body.password) || '';
 
-            console.log(cleanedPassword);
+            // console.log(cleanedPassword);
 
             if (cleanedPassword === '') {
                 // logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
@@ -153,6 +153,12 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
 
             const isMatch = await hasher.comparePassword(cleanedPassword, hashedPassword);
             if (isMatch) {
+
+                const auditQuery = `
+                        INSERT INTO public.audit_activity (userid, type, activity, activity_timestamp) 
+                        VALUES ($1, 'LOGIN', 'User logged in successfully', NOW());
+                    `;
+                await pool.query(auditQuery, [user.id]);
 
                 // Audit logging
                 // logger.info('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Success");
@@ -176,8 +182,8 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
                     // Send email
                     await sendEmail( userEmail, 'ITSSDLC OTP Code', `Your one-time code is: ${code}\nIt expires in 5 minutes.` );   
                 }
-                console.log('OTP: ', req.session.user.otp);
 
+                
                 return res.status(200).json({ message: 'Logged in successfully' });
             } else {
 
@@ -197,6 +203,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
         } else {
             // logger.info('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
             return res.status(400).json({ message: 'Invalid email or password' });
+            
         }
     });
 
@@ -241,9 +248,9 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
     try {
         // Execute the query
         const result = await pool.query(query, values);
-        console.log('Profile picture updated successfully:', result.rowCount);
+        // console.log('Profile picture updated successfully:', result.rowCount);
 
-        console.log(req.file ? req.file : 'No file uploaded');
+        // console.log(req.file ? req.file : 'No file uploaded');
 
         // Save the file to /images
         const destination = path.join(__dirname, '../images'); // Specify your destination directory
@@ -255,7 +262,7 @@ exports.uploadImage = async (req: Request & { file: { buffer: Buffer } }, res: R
                 return res.status(500).send('Error saving image.');
             }
 
-            console.log('File saved successfully:', filename);
+            // console.log('File saved successfully:', filename);
 
             // logger.info('POST /api/users/uploadImage:  Image uploaded  ' + new Date().toISOString() + " Success");
 
@@ -289,7 +296,7 @@ exports.deposit = async (req: Request, res: Response) => {
         return res.status(401).json({ message: "Unauthorized" });
     }
 
-    console.log('from the controller' , req.session.user.otp);
+    // console.log('from the controller' , req.session.user.otp);
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
