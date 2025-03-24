@@ -174,6 +174,12 @@ app.get('/otp', (req: any, res) => {
   } else res.render('otp');
 });
 
+app.get('/admin_otp', (req: any, res) => {
+  if (req.session.user === undefined || req.session.user.userType === 'Admin') {
+    return res.render('status/status_403', {message: "Unforbidden access."});
+  } else res.render('admin_otp');
+});
+
 app.get('/transfer', (req: any, res) => {
 
   if (req.session.user === undefined || req.session.user.userType === 'Admin') {

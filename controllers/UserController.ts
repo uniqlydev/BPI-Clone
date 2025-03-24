@@ -14,7 +14,7 @@ import InputCleaner from '../utils/InputCleaner';
 import { generateOTP } from '../utils/OTPgenerator';
 import { sendEmail } from '../utils/MFAsendemail';
 import '../model/mfa';
-import { hasValidMFA, insertMFA } from './mfaController';
+import { hasValidMFA, insertMFA, whichAdminAccount } from './mfaController';
 
 
 

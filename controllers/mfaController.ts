@@ -48,6 +48,14 @@ export async function markMFACodeUsed(id: number): Promise<void> {
     const query = `UPDATE mfa SET used_at = NOW() WHERE id = $1`;
     await pool.query(query, [id]);
 }
+
+export async function whichAdminAccount(email: String) {
+    const query = `SELECT role FROM users WHERE email = $1`;
+    const { rows } = await pool.query(query, [email]);
+    console.log(rows[0].role);
+    return rows.length > 0 ? rows[0].role : null;
+}
+
 export async function verifyMFA(req: Request, res: Response) {
     const { code } = req.body;
     const userEmail = req.session.user?.email;
