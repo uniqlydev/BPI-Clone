@@ -3,7 +3,7 @@ import Validator from '../utils/Validator';
 import pool from '../model/database';
 import Hash from '../utils/HashUtility';
 import moment from 'moment';
-import logger from '../utils/Logger';
+// import logger from '../utils/Logger';
 import InputCleaner from '../utils/InputCleaner';
 
 exports.login = (req: any, res: any) => {

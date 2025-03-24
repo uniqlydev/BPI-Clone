@@ -9,7 +9,7 @@ import LoginRequest from '../interfaces/LoginRequest';
 import { Request, Response } from 'express';
 import Deposit from '../model/deposit';
 import moment from 'moment';
-import logger from '../utils/Logger';
+// import logger from '../utils/Logger';
 import InputCleaner from '../utils/InputCleaner';
 
 
@@ -35,7 +35,7 @@ exports.register =  async (req: RegisterRequest , res: { status: (arg0: number) 
 
     // Check if the password and confirm password match
     if (password !== confirm_password) {
-        logger.error('POST /api/users/register:  Passwords do not match' + new Date().toISOString() + " Failed");
+       // logger.error('POST /api/users/register:  Passwords do not match' + new Date().toISOString() + " Failed");
         return res.status(400).send('Passwords do not match.');
     }
 
@@ -142,7 +142,7 @@ exports.login = (req: LoginRequest & Request, res: Response) => {
             console.log(cleanedPassword);
 
             if (cleanedPassword === '') {
-                logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
+                // logger.error('POST /api/users/login:  Login Attempt  ' + new Date().toISOString() + " Failed");
                 return res.status(400).send('Invalid password');
             }
 
@@ -326,7 +326,7 @@ exports.deposit = async (req: Request, res: Response) => {
             console.error('Error executing query:', error);
         }
 
-        logger.error('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Failed");
+        // logger.error('POST /api/users/deposit:  Deposit:\n Amount: ' + clean_amount + '\n Date: ' + formatted_date.toDate() + '\n Check Number: ' + clean_checkNum + '\n Account Number: ' + email + '\n' + new Date().toISOString() + " Failed");
         res.status(500).json({ message: 'An error occurred' });
     }
 };

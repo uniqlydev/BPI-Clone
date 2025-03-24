@@ -9,7 +9,7 @@ import rate_limiter from 'express-rate-limit'
 import morgan from 'morgan'
 import pool from './model/database'
 import User from './model/User'
-import logger from './utils/Logger'
+// import logger from './utils/Logger'
 
 
 
@@ -239,7 +239,7 @@ app.get('/logout', (req, res) => {
         // logger.info(`${req.session.user.email} logged out at ${new Date()}`);
         req.session.destroy((err: Error) => {
             if (err) {
-                logger.error('Error destroying session:', err);
+                // logger.error('Error destroying session:', err);
             }
         });
 
