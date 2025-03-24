@@ -825,3 +825,44 @@ GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO app_user;
 GRANT EXECUTE ON ALL PROCEDURES IN SCHEMA public TO app_user;
 GRANT SELECT,UPDATE,INSERT ON ALL TABLES IN SCHEMA public to app_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;
+
+
+CREATE ROLE app_acctad WITH LOGIN PASSWORD 'accadmin';
+CREATE ROLE app_transacad WITH LOGIN PASSWORD 'transadmin';
+
+GRANT SELECT,INSERT,UPDATE ON TABLE public.audit_activity TO app_acctad;
+REVOKE ALL ON TABLE public.cheques FROM app_acctad;
+REVOKE ALL ON TABLE public.deposits FROM app_acctad;
+REVOKE ALL ON TABLE public.flagged_transactions FROM app_acctad;
+GRANT SELECT,INSERT,UPDATE ON TABLE public.mfa TO app_acctad;
+REVOKE ALL ON TABLE public.transactions FROM app_acctad;
+REVOKE ALL ON TABLE public.transfers FROM app_acctad;
+
+CREATE VIEW public.users_admin AS
+SELECT id,first_name,last_name,email,phone_number,role,created_at,profile_picture,is_active
+FROM public.users;
+
+GRANT SELECT ON public.users_admin TO app_acctad;
+REVOKE ALL ON TABLE public.withdraw FROM app_acctad;
+
+
+GRANT SELECT,INSERT,UPDATE ON TABLE public.audit_activity TO app_transacad;
+GRANT SELECT ON TABLE public.cheques TO app_transacad;
+GRANT SELECT ON TABLE public.deposits TO app_transacad;
+GRANT SELECT,INSERT,UPDATE ON TABLE public.flagged_transactions TO app_transacad;
+GRANT SELECT,INSERT,UPDATE ON TABLE public.mfa TO app_transacad;
+GRANT SELECT ON TABLE public.transactions TO app_transacad;
+GRANT SELECT ON TABLE public.transfers TO app_transacad;
+GRANT SELECT ON public.users_admin TO app_transacad;
+GRANT SELECT ON TABLE public.withdraw TO app_transacad;
+
+
+GRANT EXECUTE ON PROCEDURE public.createdeposit(character varying, numeric, numeric, date)
+  TO acctad, transacad;
+GRANT EXECUTE ON PROCEDURE public.createtransfer(character varying, character varying, double precision)
+  TO acctad, transacad;
+GRANT EXECUTE ON PROCEDURE public.createwithdraw(character varying, double precision)
+  TO acctad, transacad;
+
+REVOKE ALL ON FUNCTION public.log_registration_activity() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.log_update_activity() FROM PUBLIC;
