@@ -849,6 +849,10 @@ GRANT SELECT,INSERT,UPDATE ON TABLE public.withdraw TO app_user;
 -- PostgreSQL database dump complete
 --
 
+alter table deposits
+    add constraint deposits___chequesfk
+        foreign key (chequenum) references cheques;
+
 
 
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO app_user;
